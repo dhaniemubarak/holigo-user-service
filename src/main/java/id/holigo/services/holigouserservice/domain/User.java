@@ -32,6 +32,7 @@ public class User {
 
     private String name;
 
+    @Column(unique = true)
     private String phoneNumber;
 
     @Column(unique = true)
