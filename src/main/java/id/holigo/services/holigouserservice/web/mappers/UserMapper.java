@@ -8,8 +8,6 @@ import id.holigo.services.holigouserservice.domain.User;
 
 @Mapper
 public interface UserMapper {
-
     UserDto userToUserDto(User user);
-
     User userDtoToUser(UserDto userDto);
 }
