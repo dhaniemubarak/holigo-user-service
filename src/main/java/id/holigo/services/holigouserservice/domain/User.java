@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -30,9 +31,11 @@ public class User {
     private Long id;
 
 
+    @NotBlank(message = "Name is required")
     private String name;
 
     @Column(unique = true)
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
     @Column(unique = true)
