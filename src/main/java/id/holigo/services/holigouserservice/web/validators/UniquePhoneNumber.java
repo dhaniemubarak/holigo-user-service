@@ -1,4 +1,4 @@
-package id.holigo.services.holigouserservice.validators;
+package id.holigo.services.holigouserservice.web.validators;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.lang.annotation.ElementType.FIELD;

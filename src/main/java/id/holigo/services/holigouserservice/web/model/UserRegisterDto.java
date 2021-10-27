@@ -1,7 +1,5 @@
-package id.holigo.services.common.model;
+package id.holigo.services.holigouserservice.web.model;
 
-import java.io.Serializable;
-import java.util.List;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -14,15 +12,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-// import id.holigo.services.holigouserservice.validators.UniqueEmail;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto implements Serializable {
-
-    static final long serialVersionUID = -5815566940065181210L;
+public class UserRegisterDto {
+    
     @Null
     private Long id;
 
@@ -34,19 +30,10 @@ public class UserDto implements Serializable {
     @UniquePhoneNumber
     private String phoneNumber;
 
-    @NotBlank(message = "Email is required")
     @Email
     @UniqueEmail
     private String email;
 
-    private EmailStatusEnum emailStatus;
-
-    private AccountStatusEnum accountStatus;
-
-    private String mobileToken;
-
+    @NotBlank
     private String type;
-
-    List<UserDeviceDto> userDevices;
-
 }

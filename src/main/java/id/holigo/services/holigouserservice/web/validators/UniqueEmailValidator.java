@@ -1,4 +1,4 @@
-package id.holigo.services.holigouserservice.validators;
+package id.holigo.services.holigouserservice.web.validators;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
