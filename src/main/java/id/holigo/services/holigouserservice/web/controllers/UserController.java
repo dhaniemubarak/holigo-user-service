@@ -2,7 +2,6 @@ package id.holigo.services.holigouserservice.web.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -22,15 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import id.holigo.services.common.model.UserDto;
-import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserPersonal;
-import id.holigo.services.holigouserservice.repositories.UserPersonalRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.UserDeviceService;
 import id.holigo.services.holigouserservice.services.UserPersonalService;
 import id.holigo.services.holigouserservice.services.UserService;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
-import id.holigo.services.holigouserservice.web.mappers.UserPersonalMapper;
 import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
@@ -53,13 +48,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @Autowired
-    private final UserPersonalRepository userPersonalRepository;
-
-    @Autowired
     private final UserMapper userMapper;
-
-    @Autowired
-    private final UserPersonalMapper userPersonalMapper;
 
     @Autowired
     private final UserDeviceService userDeviceService;
