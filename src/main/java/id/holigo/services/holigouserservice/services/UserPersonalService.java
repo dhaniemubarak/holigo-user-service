@@ -5,7 +5,7 @@ import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
 public interface UserPersonalService {
     UserPersonalDto getUserPersonalByUserId(Long userId);
 
-    UserPersonalDto createUserPersonal(Long userId, UserPersonalDto userPersonalDto);
+    UserPersonalDto createUserPersonalByUserId(Long userId, UserPersonalDto userPersonalDto) throws Exception;
 
     UserPersonalDto updateUserPersonal(Long personalId, UserPersonalDto userPersonalDto);
 }
