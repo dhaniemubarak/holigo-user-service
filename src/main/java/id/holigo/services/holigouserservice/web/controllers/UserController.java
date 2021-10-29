@@ -123,56 +123,24 @@ public class UserController {
     @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal" })
     public ResponseEntity<UserPersonalDto> getUserPersonal(@PathVariable("id") Long id) {
         UserPersonalDto result = userPersonalService.getUserPersonalByUserId(id);
-        if(result == null){
+        if (result == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
-        // Optional<User> user = userRepository.findById(id);
-        // if (user.isPresent()) {
-            
-        //     User fetchUser = user.get();
-        //     if (result == null) {
-        //         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        //     }
-        //     UserPersonal userPersonal = fetchUser.getUserPersonal();
-        //     return new ResponseEntity<>(userPersonalMapper.userPersonalToUserPersonalDto(userPersonal), HttpStatus.OK);
-        // }
-        // return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal" })
     public ResponseEntity<UserPersonalDto> createUserPersonal(@PathVariable("id") Long id,
-            @RequestBody UserPersonalDto userPersonalDto) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            UserPersonal userPersonal = userPersonalRepository
-                    .save(userPersonalMapper.userPersonalDtoToUserPersonal(userPersonalDto));
-            if (userPersonal.getId() != null) {
-                User fetchUser = user.get();
-                fetchUser.setUserPersonal(userPersonal);
-                userRepository.save(fetchUser);
-                return new ResponseEntity<>(userPersonalMapper.userPersonalToUserPersonalDto(userPersonal),
-                        HttpStatus.CREATED);
-            }
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            @RequestBody UserPersonalDto userPersonalDto) throws Exception {
+        return new ResponseEntity<>(userPersonalService.createUserPersonalByUserId(id, userPersonalDto),
+                HttpStatus.CREATED);
+
     }
 
     @PutMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal/{personalId}" })
     public ResponseEntity<UserPersonalDto> updateUserPersonal(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
-        Optional<UserPersonal> userPersonal = userPersonalRepository.findById(personalId);
-        if (userPersonal.isPresent()) {
-            UserPersonal fetchUserPersonal = userPersonal.get();
-            UserPersonal updateUserPersonal = userPersonalMapper.userPersonalDtoToUserPersonal(userPersonalDto);
-            updateUserPersonal.setId(fetchUserPersonal.getId());
-            log.info("user personal dto -> {}", updateUserPersonal);
-            UserPersonal userPersonalUpdated = userPersonalRepository.save(updateUserPersonal);
-            return new ResponseEntity<>(userPersonalMapper.userPersonalToUserPersonalDto(userPersonalUpdated),
-                    HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userPersonalService.updateUserPersonal(id, userPersonalDto), HttpStatus.OK);
 
     }
 }

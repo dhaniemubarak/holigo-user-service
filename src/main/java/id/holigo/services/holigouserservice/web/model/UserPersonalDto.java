@@ -13,9 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserPersonalDto {
     private Long id;
-
-    private Long version;
-
+    
     private GenderEnum gender;
 
     private Date birthDate;
