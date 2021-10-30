@@ -20,6 +20,7 @@ import javax.persistence.OneToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.lang.Nullable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -104,5 +105,9 @@ public class User {
 
     @Builder.Default
     private Boolean enabled = true;
+
+    public void setPin(String value) {
+        this.pin = new BCryptPasswordEncoder().encode(value);
+    }
 
 }

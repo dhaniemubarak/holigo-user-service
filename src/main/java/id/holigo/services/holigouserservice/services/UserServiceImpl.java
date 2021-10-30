@@ -23,6 +23,7 @@ import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
+import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,11 +134,31 @@ public class UserServiceImpl implements UserService {
         }
 
         ;
-        fetchUser.setPin(new BCryptPasswordEncoder().encode(createNewPin.getPin()));
+        fetchUser.setPin(createNewPin.getPin());
         try {
             userRepository.save(fetchUser);
         } catch (Exception e) {
             throw new Exception("Failed set PIN");
+        }
+        return userMapper.userToUserDto(fetchUser);
+    }
+
+    @Override
+    public UserDto updatePin(Long userId, ChangePin changePin) throws Exception {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        User fetchUser = user.get();
+        boolean isValid = new BCryptPasswordEncoder().matches(changePin.getCurrentPin(), fetchUser.getPin());
+        if (!isValid) {
+            throw new ForbiddenException("Current PIN not valid");
+        }
+        fetchUser.setPin(changePin.getPin());
+        try {
+            userRepository.save(fetchUser);
+        } catch (Exception e) {
+            throw new Exception("Failed change PIN");
         }
         return userMapper.userToUserDto(fetchUser);
     }

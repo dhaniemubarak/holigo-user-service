@@ -31,6 +31,7 @@ import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
+import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -154,5 +155,12 @@ public class UserController {
             @Valid @RequestBody CreateNewPin createNewPin) throws Exception {
         userService.createNewPin(id, createNewPin);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping(path = { "/api/v1/users/{id}/pin" })
+    public ResponseEntity<UserDto> updatePin(@PathVariable("id") Long id, @Valid @RequestBody ChangePin changePin)
+            throws Exception {
+        userService.updatePin(id, changePin);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
