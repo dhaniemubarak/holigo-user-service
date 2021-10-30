@@ -1,11 +1,13 @@
 package id.holigo.services.holigouserservice.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import id.holigo.services.common.model.AccountStatusEnum;
@@ -15,11 +17,13 @@ import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
+import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
+import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -115,6 +119,27 @@ public class UserServiceImpl implements UserService {
         userPaginate = new UserPaginate(users);
 
         return userPaginate;
+    }
+
+    @Override
+    public UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        User fetchUser = user.get();
+        if (fetchUser.getPin() != null) {
+            throw new ForbiddenException("PIN has been set!");
+        }
+
+        ;
+        fetchUser.setPin(new BCryptPasswordEncoder().encode(createNewPin.getPin()));
+        try {
+            userRepository.save(fetchUser);
+        } catch (Exception e) {
+            throw new Exception("Failed set PIN");
+        }
+        return userMapper.userToUserDto(fetchUser);
     }
 
 }

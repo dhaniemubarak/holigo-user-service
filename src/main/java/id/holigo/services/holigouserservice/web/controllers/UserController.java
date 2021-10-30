@@ -2,6 +2,7 @@ package id.holigo.services.holigouserservice.web.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import id.holigo.services.common.model.UserDto;
+import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.UserDeviceService;
 import id.holigo.services.holigouserservice.services.UserPersonalService;
@@ -29,6 +31,7 @@ import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
+import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -131,5 +134,25 @@ public class UserController {
             @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
         return new ResponseEntity<>(userPersonalService.updateUserPersonal(id, userPersonalDto), HttpStatus.OK);
 
+    }
+
+    @GetMapping(path = { "/api/v1/users/{id}/pin" })
+    public ResponseEntity<UserDto> pinCheckAvailability(@PathVariable("id") Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        User fetchUser = user.get();
+        if (fetchUser.getPin() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(path = { "/api/v1/users/{id}/pin" })
+    public ResponseEntity<UserDto> createNewPin(@PathVariable("id") Long id,
+            @Valid @RequestBody CreateNewPin createNewPin) throws Exception {
+        userService.createNewPin(id, createNewPin);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
