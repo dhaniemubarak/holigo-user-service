@@ -1,6 +1,5 @@
 package id.holigo.services.holigouserservice.domain;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -25,20 +24,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-public class UserPersonal {
+public class UserPersonalPhotoProfil {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private GenderEnum gender;
+    private String fileName;
 
-    private Date birthDate;
+    private String fileDownloadUri;
 
-    private String city;
+    private String fileType;
 
-    @OneToOne(mappedBy = "userPersonal")
-    private User user;
+    private Long size;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -47,6 +45,7 @@ public class UserPersonal {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @OneToOne
-    private UserPersonalPhotoProfil photoProfil;
+    @OneToOne(mappedBy = "photoProfil")
+    private UserPersonal userPersonal;
+
 }

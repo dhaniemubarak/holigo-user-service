@@ -1,6 +1,6 @@
 package id.holigo.services.holigouserservice.web.model;
 
-import java.sql.Date;
+import javax.validation.constraints.Null;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserPersonalDto {
+public class UserPersonalPhotoProfilDto {
+
+    @Null
     private Long id;
-    
-    private GenderEnum gender;
 
-    private Date birthDate;
+    private String fileName;
 
-    private String city;
+    private String fileDownloadUri;
 
-    private UserPersonalPhotoProfilDto photoProfil;
+    private String fileType;
+
+    private Long size;
+
 }

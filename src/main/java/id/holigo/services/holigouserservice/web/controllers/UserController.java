@@ -1,18 +1,24 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,17 +26,24 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
+import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfil;
+import id.holigo.services.holigouserservice.repositories.UserPersonalPhotoProfileRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.UserDeviceService;
 import id.holigo.services.holigouserservice.services.UserPersonalService;
 import id.holigo.services.holigouserservice.services.UserService;
+import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
+import id.holigo.services.holigouserservice.web.mappers.UserPersonalPhotoProfileMapper;
 import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
+import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +65,13 @@ public class UserController {
     private final UserRepository userRepository;
 
     @Autowired
+    private final UserPersonalPhotoProfileRepository userPersonalPhotoProfileRepository;
+
+    @Autowired
     private final UserMapper userMapper;
+
+    @Autowired
+    private final UserPersonalPhotoProfileMapper userPersonalPhotoProfileMapper;
 
     @Autowired
     private final UserDeviceService userDeviceService;
@@ -162,5 +181,67 @@ public class UserController {
             throws Exception {
         userService.updatePin(id, changePin);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile" })
+    public ResponseEntity<?> uploadPhotoProfile(@PathVariable("id") Long id,
+            @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
+        // String fileName = fileStorageService.storeFile(file);
+        UserPersonalPhotoProfilDto userPersonalPhotoProfilDto = userPersonalService.savePhotoProfile(personalId, file);
+
+        String locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/v1/users/" + Long.toString(id) + "/userPersonal/" + personalId + "/photoProfile/"
+                        + userPersonalPhotoProfilDto.getId())
+                .toUriString();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Location", locationUri);
+
+        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+    }
+
+    @GetMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
+    public ResponseEntity<UserPersonalPhotoProfilDto> getPhotoProfileData(@PathVariable("id") Long id,
+            @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+        Optional<UserPersonalPhotoProfil> fetchPhotoProfile = userPersonalPhotoProfileRepository
+                .findById(photoProfileId);
+        if (fetchPhotoProfile.isEmpty()) {
+            throw new NotFoundException("Photo profile not found");
+        }
+        return new ResponseEntity<>(userPersonalPhotoProfileMapper
+                .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(fetchPhotoProfile.get()), HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
+    public ResponseEntity<?> deletePhotoProfile(@PathVariable("id") Long id,
+            @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+        Optional<UserPersonalPhotoProfil> fetchPhotoProfile = userPersonalPhotoProfileRepository
+                .findById(photoProfileId);
+        if (fetchPhotoProfile.isEmpty()) {
+            throw new NotFoundException("Photo profile not found");
+        }
+        if (userPersonalService.deletePhotoProfile(photoProfileId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @GetMapping(path = { "/api/v1/users/{id}/photoProfile/{fileName:.+}" })
+    public ResponseEntity<Resource> getPhotoProfile(@PathVariable("id") Long id,
+            @PathVariable("fileName") String fileName, HttpServletRequest request) {
+        Resource resource = userPersonalService.getPhotoProfile(fileName);
+
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException e) {
+            //
+        }
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+                // .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
+                // resource.getFilename() + "\"")
+                .body(resource);
     }
 }
