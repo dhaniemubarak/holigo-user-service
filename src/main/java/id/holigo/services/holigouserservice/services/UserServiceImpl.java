@@ -10,13 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import id.holigo.services.common.model.AccountStatusEnum;
-import id.holigo.services.common.model.EmailStatusEnum;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
+import id.holigo.services.holigouserservice.domain.AccountStatusEnum;
+import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
+import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
@@ -33,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UserServiceImpl implements UserService {
 
+    public static final EmailStatusEnum INIT_EMAIL_STATUS = EmailStatusEnum.WAITING_CONFIRMATION;
+
     @Autowired
     private final UserRepository userRepository;
 
@@ -45,6 +48,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UserDeviceRepository userDeviceRepository;
 
+    @Autowired
+    final UserPersonalService userPersonalService;
+
     @Override
     @Transactional
     public UserDto findById(Long id) {
@@ -53,13 +59,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto save(UserDto userDto) {
+    public UserDto save(UserDto userDto) throws Exception {
         UserDevice userDevice = userDeviceMapper.userDeviceDtoToUserDevice(userDto.getUserDevices().get(0));
-
-        userDto.setType("USER");
-        userDto.setAccountStatus(AccountStatusEnum.ACTIVE);
-        userDto.setEmailStatus(EmailStatusEnum.WAITING_CONFIRMATION);
-        User userSaved = userRepository.save(userMapper.userDtoToUser(userDto));
+        UserPersonal userPersonal = new UserPersonal();
+        userPersonal.setName(userDto.getName());
+        userPersonal.setEmail(userDto.getEmail());
+        userPersonal.setPhoneNumber(userDto.getPhoneNumber());
+        userPersonal.setEmailStatus(INIT_EMAIL_STATUS);
+        UserPersonal savedUserPersonal = userPersonalService.createUserPersona(userPersonal);
+        if (savedUserPersonal.getId() == null) {
+            throw new Exception("Failed save personal data");
+        }
+        User user = userMapper.userDtoToUser(userDto);
+        user.setType("USER");
+        user.setAccountStatus(AccountStatusEnum.ACTIVE);
+        user.setEmailStatus(INIT_EMAIL_STATUS);
+        user.setUserPersonal(savedUserPersonal);
+        User userSaved = userRepository.save(user);
         if (userSaved.getId() != null) {
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);

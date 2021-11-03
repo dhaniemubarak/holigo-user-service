@@ -59,6 +59,15 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         return userPersonalMapper.userPersonalToUserPersonalDto(userPersonal);
     }
 
+    @Override
+    public UserPersonal createUserPersona(UserPersonal userPersonal) throws Exception {
+        UserPersonal savedUserPersonal = userPersonalRepository.save(userPersonal);
+        if (savedUserPersonal.getId() == null) {
+            throw new Exception("Failed save personal data");
+        }
+        return savedUserPersonal;
+    }
+
     @Transactional
     @Override
     public UserPersonalDto createUserPersonalByUserId(Long userId, UserPersonalDto userPersonalDto) throws Exception {
@@ -83,15 +92,25 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         return userPersonalMapper.userPersonalToUserPersonalDto(userPersonalSaved);
     }
 
+    @Transactional
     @Override
     public UserPersonalDto updateUserPersonal(Long personalId, UserPersonalDto userPersonalDto) {
-        Optional<UserPersonal> userPersonal = userPersonalRepository.findById(personalId);
-        if (userPersonal.isEmpty()) {
+        Optional<UserPersonal> fetchUserPersonal = userPersonalRepository.findById(personalId);
+        if (fetchUserPersonal.isEmpty()) {
             throw new NotFoundException("Personal data not found");
         }
-        UserPersonal fetchUserPersonal = userPersonal.get();
+        UserPersonal userPersonal = fetchUserPersonal.get();
         UserPersonal updateUserPersonal = userPersonalMapper.userPersonalDtoToUserPersonal(userPersonalDto);
-        updateUserPersonal.setId(fetchUserPersonal.getId());
+        updateUserPersonal.setId(userPersonal.getId());
+        updateUserPersonal.setPhoneNumber(userPersonal.getPhoneNumber());
+        User user = userPersonal.getUser();
+        user.setEmail(updateUserPersonal.getEmail());
+        user.setName(updateUserPersonal.getName());
+        if (userPersonal.getEmail() != updateUserPersonal.getEmail()) {
+            updateUserPersonal.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
+            user.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
+        }
+        userRepository.save(user);
         UserPersonal userPersonalUpdated = userPersonalRepository.save(updateUserPersonal);
         return userPersonalMapper.userPersonalToUserPersonalDto(userPersonalUpdated);
     }

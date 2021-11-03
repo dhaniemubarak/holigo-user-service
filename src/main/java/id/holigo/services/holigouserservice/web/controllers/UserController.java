@@ -97,7 +97,7 @@ public class UserController {
     }
 
     @PostMapping(produces = "application/json", path = { "/api/v1/users" })
-    public ResponseEntity<UserDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto) throws Exception {
         return new ResponseEntity<UserDto>(userService.save(userDto), HttpStatus.CREATED);
     }
 

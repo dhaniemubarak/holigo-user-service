@@ -9,7 +9,7 @@ import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 public interface UserService {
     UserDto findById(Long id);
 
-    UserDto save(UserDto userDto);
+    UserDto save(UserDto userDto) throws Exception;
 
     UserRegisterDto createUserViaOtp(UserRegisterDto userRegisterDto);
 
