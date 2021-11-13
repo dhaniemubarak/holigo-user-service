@@ -1,5 +1,7 @@
 package id.holigo.services.holigouserservice.listeners;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.jms.JMSException;
@@ -33,11 +35,16 @@ public class OauthUserListener {
         Optional<User> fetchUser = userRepository.findByPhoneNumber(userAuthenticationDto.getPhoneNumber());
         if (fetchUser.isPresent()) {
             User user = fetchUser.get();
+            Collection<String> authorities = new ArrayList<>();
+            user.getAuthorities().forEach(authority -> {
+                authorities.add(authority.getRole());
+            });
             userAuthenticationDto.setId(user.getId());
             userAuthenticationDto.setOneTimePassword(user.getOneTimePassword());
             userAuthenticationDto.setAccountNonExpired(user.getAccountNonExpired());
             userAuthenticationDto.setEnabled(user.getEnabled());
             userAuthenticationDto.setAccountNonLocked(user.getAccountNonLocked());
+            userAuthenticationDto.setAuthorities(authorities);
         }
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userAuthenticationDto);
     }
