@@ -26,4 +26,6 @@ public interface UserService {
     UserDto createNewPin(Long userId, CreateNewPin createNewPin)  throws Exception;
 
     UserDto updatePin(Long userId, ChangePin changePin) throws Exception;
+
+    void addAuthorityToUser(String phoneNumber, String role);
 }

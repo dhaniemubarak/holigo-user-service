@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static javax.persistence.FetchType.EAGER;
+import static javax.persistence.FetchType.LAZY;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -38,7 +40,7 @@ import lombok.Singular;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(length = 100, columnDefinition = "varchar(100)")
@@ -77,7 +79,7 @@ public class User {
     private String mobileToken;
 
     @Singular
-    @ManyToMany
+    @ManyToMany(fetch = EAGER)
     @JoinTable(name = "user_authority", joinColumns = {
             @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "authority_id", referencedColumnName = "id") })
@@ -87,7 +89,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserDevice> userDevices = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = LAZY)
     private UserPersonal userPersonal;
 
     public void addUserDevice(UserDevice userDevice) {
@@ -108,6 +110,10 @@ public class User {
 
     public void setPin(String value) {
         this.pin = new BCryptPasswordEncoder().encode(value);
+    }
+
+    public void setOneTimePassword(String value) {
+        this.oneTimePassword = new BCryptPasswordEncoder().encode(value);
     }
 
 }

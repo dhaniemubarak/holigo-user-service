@@ -11,9 +11,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import id.holigo.services.common.model.UserDto;
+import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.domain.AccountStatusEnum;
+import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
@@ -27,9 +29,7 @@ import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,6 +38,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final AuthorityRepository authorityRepository;
 
     @Autowired
     private final UserMapper userMapper;
@@ -116,7 +119,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getByPhoneNumber(String phoneNumber) {
-        log.info("findByPhoneNumber called.......");
         return userMapper
                 .userToUserDto(userRepository.findByPhoneNumber(phoneNumber).orElseThrow(NotFoundException::new));
     }
@@ -177,6 +179,17 @@ public class UserServiceImpl implements UserService {
             throw new Exception("Failed change PIN");
         }
         return userMapper.userToUserDto(fetchUser);
+    }
+
+    @Override
+    public void addAuthorityToUser(String phoneNumber, String role) {
+        Optional<User> fetchUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (fetchUser.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        User user = fetchUser.get();
+        Authority authority = authorityRepository.findByRole(role);
+        user.getAuthorities().add(authority);
     }
 
 }
