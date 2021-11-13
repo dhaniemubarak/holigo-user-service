@@ -1,5 +1,7 @@
 package id.holigo.services.common.model;
 
+import java.util.Collection;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,8 @@ public class UserAuthenticationDto {
     private AccountStatusEnum accountStatus;
 
     private String type;
+    
+    private Collection<String> authorities;
 
     private String oneTimePassword;
 
