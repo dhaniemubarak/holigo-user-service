@@ -1,6 +1,7 @@
 package id.holigo.services.common.model;
+import java.time.OffsetDateTime;
 
-import java.security.Timestamp;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,15 +25,18 @@ public class OtpDto {
 
     private String phoneNumber;
 
-    private String type;
+    private OtpTypeEnum type;
 
-    private Timestamp expiredAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private OffsetDateTime expiredAt;
 
     private byte attemptGranted;
 
-    private Timestamp createdAt;
-    
-    private Timestamp updatedAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private OffsetDateTime createdAt;
 
-    private String status;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private OffsetDateTime updatedAt;
+
+    private OtpStatusEnum status;
 }

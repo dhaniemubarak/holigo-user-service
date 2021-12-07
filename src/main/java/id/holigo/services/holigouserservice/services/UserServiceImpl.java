@@ -1,7 +1,9 @@
 package id.holigo.services.holigouserservice.services;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -14,7 +16,7 @@ import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
-import id.holigo.services.holigouserservice.domain.AccountStatusEnum;
+import id.holigo.services.common.model.AccountStatusEnum;
 import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
@@ -62,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto save(UserDto userDto) throws Exception {
+    public User save(UserDto userDto) throws Exception {
         UserDevice userDevice = userDeviceMapper.userDeviceDtoToUserDevice(userDto.getUserDevices().get(0));
         UserPersonal userPersonal = new UserPersonal();
         userPersonal.setName(userDto.getName());
@@ -73,19 +75,27 @@ public class UserServiceImpl implements UserService {
         if (savedUserPersonal.getId() == null) {
             throw new Exception("Failed save personal data");
         }
+        Optional<Authority> fetchAuth = authorityRepository.findById(2);
+
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         user.setEmailStatus(INIT_EMAIL_STATUS);
         user.setUserPersonal(savedUserPersonal);
+        if (fetchAuth.isPresent()) {
+            Authority auth = fetchAuth.get();
+            Set<Authority> roles = new HashSet<>();
+            roles.add(auth);
+            user.setAuthorities(roles);
+        }
         User userSaved = userRepository.save(user);
+
         if (userSaved.getId() != null) {
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
-            return userMapper.userToUserDto(userSaved);
+            return userSaved;
         }
         return null;
-
     }
 
     @Override
@@ -190,6 +200,20 @@ public class UserServiceImpl implements UserService {
         User user = fetchUser.get();
         Authority authority = authorityRepository.findByRole(role);
         user.getAuthorities().add(authority);
+    }
+
+    @Override
+    public void createOneTimePassword(User user, String oneTimePassword) {
+        user.setOneTimePassword(new BCryptPasswordEncoder().encode(oneTimePassword));
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public void resetOneTimePassword(User user) {
+        user.setOneTimePassword(null);
+        userRepository.save(user);
+
     }
 
 }

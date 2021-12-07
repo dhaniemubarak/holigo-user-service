@@ -32,4 +32,6 @@ public class UserAuthenticationDto {
     private Boolean credentialsNonExpired;
 
     private Boolean enabled;
+
+
 }

@@ -1,6 +1,7 @@
 package id.holigo.services.holigouserservice.services;
 
 import id.holigo.services.common.model.UserDto;
+import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
@@ -9,7 +10,7 @@ import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 public interface UserService {
     UserDto findById(Long id);
 
-    UserDto save(UserDto userDto) throws Exception;
+    User save(UserDto userDto) throws Exception;
 
     UserRegisterDto createUserViaOtp(UserRegisterDto userRegisterDto);
 
@@ -23,9 +24,14 @@ public interface UserService {
 
     UserPaginate getAllUser();
 
-    UserDto createNewPin(Long userId, CreateNewPin createNewPin)  throws Exception;
+    UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception;
 
     UserDto updatePin(Long userId, ChangePin changePin) throws Exception;
 
     void addAuthorityToUser(String phoneNumber, String role);
+
+    void createOneTimePassword(User user, String oneTimePassword);
+
+    void resetOneTimePassword(User user);
+
 }

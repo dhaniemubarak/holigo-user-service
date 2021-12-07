@@ -24,6 +24,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import id.holigo.services.common.model.AccountStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -110,10 +111,6 @@ public class User {
 
     public void setPin(String value) {
         this.pin = new BCryptPasswordEncoder().encode(value);
-    }
-
-    public void setOneTimePassword(String value) {
-        this.oneTimePassword = new BCryptPasswordEncoder().encode(value);
     }
 
 }

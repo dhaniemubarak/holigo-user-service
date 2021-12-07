@@ -10,6 +10,10 @@ import org.springframework.jms.support.converter.MessageType;
 public class JmsConfig {
     public static final String OTP_REGISTER_VALIDATION_QUEUE = "request-otp-register-validation";
     public static final String OAUTH_USER_DATA_QUEUE = "oauth-user-data";
+    public static final String GET_USER_DATA_QUEUE = "get-user-data-queue";
+    public static final String SET_USER_OTP_QUEUE = "set-user-otp-queue";
+    public static final String CREATE_ACCESS_TOKEN_QUEUE = "create-access-token-queue";
+
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();

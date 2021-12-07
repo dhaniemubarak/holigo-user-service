@@ -1,0 +1,1 @@
+INSERT INTO AUTHORITY(id, role) VALUES (1,'GUEST'), (2, 'USER');

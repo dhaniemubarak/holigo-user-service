@@ -2,6 +2,7 @@ package id.holigo.services.holigouserservice.web.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +29,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import id.holigo.services.common.model.OauthAccessTokenDto;
+import id.holigo.services.common.model.UserAuthenticationDto;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfil;
@@ -37,6 +41,8 @@ import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.UserDeviceService;
 import id.holigo.services.holigouserservice.services.UserPersonalService;
 import id.holigo.services.holigouserservice.services.UserService;
+import id.holigo.services.holigouserservice.services.oauth.OauthService;
+import id.holigo.services.holigouserservice.services.otp.OtpService;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserPersonalPhotoProfileMapper;
@@ -59,6 +65,9 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
+    private final OtpService otpService;
+
+    @Autowired
     private final UserPersonalService userPersonalService;
 
     @Autowired
@@ -75,6 +84,9 @@ public class UserController {
 
     @Autowired
     private final UserDeviceService userDeviceService;
+
+    @Autowired
+    private final OauthService oauthService;
 
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
     private static final Integer DEFAULT_PAGE_SIZE = 25;
@@ -97,8 +109,31 @@ public class UserController {
     }
 
     @PostMapping(produces = "application/json", path = { "/api/v1/users" })
-    public ResponseEntity<UserDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto) throws Exception {
-        return new ResponseEntity<UserDto>(userService.save(userDto), HttpStatus.CREATED);
+    public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto) throws Exception {
+
+        boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
+        if (isRegisterValid) {
+            OauthAccessTokenDto oauthAccessTokenDto = null;
+            User savedUser = userService.save(userDto);
+            userService.createOneTimePassword(savedUser, "0921");
+            Collection<String> authorities = new ArrayList<>();
+            savedUser.getAuthorities().forEach(authority -> {
+                authorities.add(authority.getRole());
+            });
+            UserAuthenticationDto userAuthenticationDto = UserAuthenticationDto.builder().id(savedUser.getId())
+                    .phoneNumber(savedUser.getPhoneNumber()).accountStatus(savedUser.getAccountStatus())
+                    .type(savedUser.getType()).authorities(authorities).oneTimePassword("0921")
+                    .accountNonExpired(savedUser.getAccountNonExpired())
+                    .accountNonLocked(savedUser.getAccountNonLocked())
+                    .credentialsNonExpired(savedUser.getCredentialsNonExpired()).enabled(savedUser.getEnabled())
+                    .build();
+            oauthAccessTokenDto = oauthService.createAccessToken(userAuthenticationDto);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(
+                    UriComponentsBuilder.fromPath("/api/v1/users/{id}").buildAndExpand(savedUser.getId()).toUri());
+            return new ResponseEntity<>(oauthAccessTokenDto, httpHeaders, HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @PutMapping(path = { "/api/v1/users/{id}" })
@@ -106,13 +141,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto) {
         return new ResponseEntity<UserDto>(userService.update(id, userDto), HttpStatus.OK);
     }
-
-    // @PostMapping(path = "/api/v2/users")
-    // public String register(@RequestBody UserDto userDto) {
-    // userOtpService.checkForOtpIsValid(userDto);
-    // return "Ok";
-    // }
-
+    
     @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}" })
     public ResponseEntity<UserDto> getUser(@NotNull @PathVariable("id") Long id) {
         return new ResponseEntity<UserDto>(userService.findById(id), HttpStatus.OK);

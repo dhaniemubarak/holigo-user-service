@@ -1,0 +1,94 @@
+version: '3.8'
+services:
+  jms:
+    image: vromero/activemq-artemis
+    ports:
+      - 8161:8161
+      - 61616:61616
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+  eureka-server:
+    image: holigo/holigo-eureka-server
+    ports:
+      - 8761:8761
+  config-server:
+    image: holigo/holigo-config-server
+    ports:
+      - 8888:8888
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://netflix:eureka@eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+  user-service:
+    image: holigo/holigo-user-service
+    ports:
+      - 8081:8081
+    depends_on:
+      - eureka-server
+      - config-server
+      - jms
+      - zipkin
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://netflix:eureka@eureka-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      SPRING_ARTEMIS_HOST: jms
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    restart: on-failure
+  otp-service:
+    image: holigo/holigo-otp-service
+    ports:
+      - 8083:8083
+    depends_on:
+      - eureka-server
+      - config-server
+      - jms
+      - zipkin
+      - user-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://netflix:eureka@eureka-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      SPRING_ARTEMIS_HOST: jms
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    restart: on-failure
+  oauth-service:
+    image: holigo/holigo-oauth-service
+    ports:
+      - 8082:8082
+    depends_on:
+      - eureka-server
+      - config-server
+      - jms
+      - zipkin
+      - user-service
+      - otp-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://netflix:eureka@eureka-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      SPRING_ARTEMIS_HOST: jms
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    restart: on-failure
+  api-gateway:
+    image: holigo/holigo-api-gateway-server
+    ports:
+      - 9090:9090
+    depends_on:
+      - eureka-server
+      - config-server
+      - jms
+      - zipkin
+      - user-service
+      - otp-service
+      - oauth-service
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://netflix:eureka@eureka-server:8761/eureka/
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      SPRING_ARTEMIS_HOST: jms
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: 'true'
+    restart: on-failure

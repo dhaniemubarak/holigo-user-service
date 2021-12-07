@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -15,6 +16,7 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import id.holigo.services.common.events.UserAuthenticationEvent;
 import id.holigo.services.common.model.UserAuthenticationDto;
 import id.holigo.services.holigouserservice.config.JmsConfig;
 import id.holigo.services.holigouserservice.domain.User;
@@ -25,8 +27,10 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class OauthUserListener {
 
+    @Autowired
     private final JmsTemplate jmsTemplate;
 
+    @Autowired
     private final UserRepository userRepository;
 
     @JmsListener(destination = JmsConfig.OAUTH_USER_DATA_QUEUE)
@@ -47,5 +51,17 @@ public class OauthUserListener {
             userAuthenticationDto.setAuthorities(authorities);
         }
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userAuthenticationDto);
+    }
+
+    @JmsListener(destination = JmsConfig.SET_USER_OTP_QUEUE)
+    public void listenForSetOTP(UserAuthenticationEvent userAuthenticationEvent) {
+        UserAuthenticationDto userAuthenticationDto = userAuthenticationEvent.getUserAuthenticationDto();
+
+        Optional<User> fetchUser = userRepository.findById(userAuthenticationDto.getId());
+        if (fetchUser.isPresent()) {
+            User user = fetchUser.get();
+            user.setOneTimePassword(userAuthenticationDto.getOneTimePassword());
+            userRepository.save(user);
+        }
     }
 }

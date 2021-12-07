@@ -47,6 +47,8 @@ public class UserDto implements Serializable {
 
     private String type;
 
+    private Long registerId;
+
     List<UserDeviceDto> userDevices;
 
 }
