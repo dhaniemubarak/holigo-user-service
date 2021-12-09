@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -109,11 +110,15 @@ public class UserController {
     }
 
     @PostMapping(produces = "application/json", path = { "/api/v1/users" })
-    public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto) throws Exception {
-
+    public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto,
+            @RequestHeader(value = "user_id") Long userId) throws Exception {
+        log.info("User id -> {}", userId);
         boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
         if (isRegisterValid) {
             OauthAccessTokenDto oauthAccessTokenDto = null;
+            if (userId != null) {
+                userDto.setId(userId);
+            }
             User savedUser = userService.save(userDto);
             userService.createOneTimePassword(savedUser, "0921");
             Collection<String> authorities = new ArrayList<>();
@@ -141,7 +146,7 @@ public class UserController {
             @Valid @RequestBody UserDto userDto) {
         return new ResponseEntity<UserDto>(userService.update(id, userDto), HttpStatus.OK);
     }
-    
+
     @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}" })
     public ResponseEntity<UserDto> getUser(@NotNull @PathVariable("id") Long id) {
         return new ResponseEntity<UserDto>(userService.findById(id), HttpStatus.OK);
