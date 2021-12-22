@@ -18,6 +18,7 @@ import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.config.JmsConfig;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
+import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -30,14 +31,29 @@ public class UserListener {
     @Autowired
     private final UserRepository userRepository;
 
-    @JmsListener(destination = JmsConfig.GET_USER_DATA_QUEUE)
-    public void listen(@Payload UserDto userDto, @Headers MessageHeaders headers, Message message)
+    @Autowired
+    private final UserMapper userMapper;
+
+    @JmsListener(destination = JmsConfig.GET_USER_DATA_BY_PHONE_NUMBER_QUEUE)
+    public void listenUserByPhoneNumber(@Payload UserDto userDto, @Headers MessageHeaders headers, Message message)
             throws JmsException, JMSException {
         Optional<User> fetchUser = userRepository.findByPhoneNumber(userDto.getPhoneNumber());
         if (fetchUser.isPresent()) {
             User user = fetchUser.get();
-            userDto.setId(user.getId());
+            userDto = userMapper.userToUserDto(user);
         }
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userDto);
     }
+
+    @JmsListener(destination = JmsConfig.GET_USER_DATA_BY_ID_QUEUE)
+    public void listenUserById(@Payload UserDto userDto, @Headers MessageHeaders headers, Message message)
+            throws JmsException, JMSException {
+        Optional<User> fetchUser = userRepository.findById(userDto.getId());
+        if (fetchUser.isPresent()) {
+            User user = fetchUser.get();
+            userDto = userMapper.userToUserDto(user);
+        }
+        jmsTemplate.convertAndSend(message.getJMSReplyTo(), userDto);
+    }
+
 }
