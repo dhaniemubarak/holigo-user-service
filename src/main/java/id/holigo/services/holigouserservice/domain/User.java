@@ -76,7 +76,7 @@ public class User {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @Nullable
+    @Column(nullable = true)
     private String mobileToken;
 
     @Singular
