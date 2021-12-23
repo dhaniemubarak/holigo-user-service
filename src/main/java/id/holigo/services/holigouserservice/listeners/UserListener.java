@@ -13,6 +13,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.config.JmsConfig;
@@ -34,6 +35,7 @@ public class UserListener {
     @Autowired
     private final UserMapper userMapper;
 
+    @Transactional
     @JmsListener(destination = JmsConfig.GET_USER_DATA_BY_PHONE_NUMBER_QUEUE)
     public void listenUserByPhoneNumber(@Payload UserDto userDto, @Headers MessageHeaders headers, Message message)
             throws JmsException, JMSException {
@@ -45,6 +47,7 @@ public class UserListener {
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userDto);
     }
 
+    @Transactional
     @JmsListener(destination = JmsConfig.GET_USER_DATA_BY_ID_QUEUE)
     public void listenUserById(@Payload UserDto userDto, @Headers MessageHeaders headers, Message message)
             throws JmsException, JMSException {
