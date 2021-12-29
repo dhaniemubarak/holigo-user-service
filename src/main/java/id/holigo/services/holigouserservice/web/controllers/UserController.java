@@ -186,7 +186,7 @@ public class UserController {
     @PutMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal/{personalId}" })
     public ResponseEntity<UserPersonalDto> updateUserPersonal(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
-        return new ResponseEntity<>(userPersonalService.updateUserPersonal(id, userPersonalDto), HttpStatus.OK);
+        return new ResponseEntity<>(userPersonalService.updateUserPersonal(personalId, userPersonalDto), HttpStatus.OK);
 
     }
 
