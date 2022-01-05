@@ -6,6 +6,7 @@ import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
+import id.holigo.services.holigouserservice.web.requests.ResetPin;
 
 public interface UserService {
     UserDto findById(Long id);
@@ -25,6 +26,8 @@ public interface UserService {
     UserPaginate getAllUser();
 
     UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception;
+
+    UserDto resetPin(Long userId, ResetPin resetPin) throws Exception;
 
     UserDto updatePin(Long userId, ChangePin changePin) throws Exception;
 

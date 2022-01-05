@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -33,6 +32,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import id.holigo.services.common.model.OauthAccessTokenDto;
+import id.holigo.services.common.model.OtpDto;
 import id.holigo.services.common.model.UserAuthenticationDto;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
@@ -53,6 +53,7 @@ import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
 import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
+import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -215,6 +216,13 @@ public class UserController {
             throws Exception {
         userService.updatePin(id, changePin);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(path = { "/api/v1/users/{id}/resetPin" })
+    public ResponseEntity<OtpDto> resetPin(@PathVariable("id") Long id, @Valid @RequestBody ResetPin resetPin)
+            throws Exception {
+        userService.resetPin(id, resetPin);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile" })

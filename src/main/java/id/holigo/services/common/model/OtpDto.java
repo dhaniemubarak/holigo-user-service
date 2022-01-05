@@ -1,7 +1,5 @@
 package id.holigo.services.common.model;
-import java.time.OffsetDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,10 +13,6 @@ import lombok.NoArgsConstructor;
 public class OtpDto {
     private Long id;
 
-    private Long version;
-
-    private String key;
-
     private String encryptKey;
 
     private Long userId;
@@ -27,16 +21,17 @@ public class OtpDto {
 
     private OtpTypeEnum type;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private OffsetDateTime expiredAt;
+    private Timestamp expiredAt;
 
     private byte attemptGranted;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private OffsetDateTime createdAt;
+    private String oneTimePassword;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private OffsetDateTime updatedAt;
+    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private Timestamp createdAt;
+
+    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private Timestamp updatedAt;
 
     private OtpStatusEnum status;
 }

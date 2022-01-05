@@ -14,7 +14,8 @@ public class JmsConfig {
     public static final String GET_USER_DATA_BY_ID_QUEUE = "get-user-data-by-id-queue";
     public static final String SET_USER_OTP_QUEUE = "set-user-otp-queue";
     public static final String CREATE_ACCESS_TOKEN_QUEUE = "create-access-token-queue";
-
+    public static final String OTP_RESET_PIN_VALIDATION_QUEUE = "request-otp-reset-pin-validation";
+    
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();

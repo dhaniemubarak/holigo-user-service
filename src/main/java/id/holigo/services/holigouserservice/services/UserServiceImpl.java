@@ -16,7 +16,10 @@ import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
+import id.holigo.services.holigouserservice.services.otp.OtpService;
 import id.holigo.services.common.model.AccountStatusEnum;
+import id.holigo.services.common.model.OtpDto;
+import id.holigo.services.common.model.OtpStatusEnum;
 import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
@@ -30,6 +33,7 @@ import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
+import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -55,6 +59,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     final UserPersonalService userPersonalService;
+
+    @Autowired
+    private final OtpService otpService;
 
     @Override
     @Transactional
@@ -152,23 +159,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
+        Optional<User> fetchUser = userRepository.findById(userId);
+        if (fetchUser.isEmpty()) {
             throw new NotFoundException("User not found");
         }
-        User fetchUser = user.get();
-        if (fetchUser.getPin() != null) {
+        User user = fetchUser.get();
+        if (user.getPin() != null) {
             throw new ForbiddenException("PIN has been set!");
         }
-
-        ;
-        fetchUser.setPin(createNewPin.getPin());
+        user.setPin(createNewPin.getPin());
         try {
-            userRepository.save(fetchUser);
+            userRepository.save(user);
         } catch (Exception e) {
             throw new Exception("Failed set PIN");
         }
-        return userMapper.userToUserDto(fetchUser);
+        return userMapper.userToUserDto(user);
     }
 
     @Override
@@ -214,6 +219,33 @@ public class UserServiceImpl implements UserService {
         user.setOneTimePassword(null);
         userRepository.save(user);
 
+    }
+
+    @Override
+    public UserDto resetPin(Long userId, ResetPin resetPin) throws Exception {
+        Optional<User> fetchUser = userRepository.findById(userId);
+        if (fetchUser.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+        User user = fetchUser.get();
+        OtpDto otpDto = otpService.getOtpForResetPin(OtpDto.builder().phoneNumber(user.getPhoneNumber())
+                .oneTimePassword(resetPin.getOneTimePassword()).build());
+
+        boolean isOtpValid = false;
+        if (otpDto.getStatus() == OtpStatusEnum.CONFIRMED) {
+            isOtpValid = true;
+        }
+        if (isOtpValid) {
+            user.setPin(resetPin.getPin());
+            try {
+                userRepository.save(user);
+            } catch (Exception e) {
+                throw new Exception("Failed set PIN");
+            }
+        } else {
+            throw new ForbiddenException("OTP is wrong!");
+        }
+        return userMapper.userToUserDto(user);
     }
 
 }
