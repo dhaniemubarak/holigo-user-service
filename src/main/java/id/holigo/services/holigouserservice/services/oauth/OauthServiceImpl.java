@@ -16,9 +16,7 @@ import id.holigo.services.common.model.OauthAccessTokenDto;
 import id.holigo.services.common.model.UserAuthenticationDto;
 import id.holigo.services.holigouserservice.config.JmsConfig;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OauthServiceImpl implements OauthService {
@@ -30,7 +28,6 @@ public class OauthServiceImpl implements OauthService {
     @Override
     public OauthAccessTokenDto createAccessToken(UserAuthenticationDto userAuthenticationDto)
             throws JsonMappingException, JsonProcessingException, JMSException {
-        log.info("create access token is running ....");
         Message received = jmsTemplate.sendAndReceive(JmsConfig.CREATE_ACCESS_TOKEN_QUEUE, new MessageCreator() {
             @Override
             public Message createMessage(Session session) throws JMSException {
