@@ -112,7 +112,7 @@ public class UserController {
 
     @PostMapping(produces = "application/json", path = { "/api/v1/users" })
     public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto,
-            @RequestHeader(value = "user_id") Long userId) throws Exception {
+            @RequestHeader(value = "user-id") Long userId) throws Exception {
         log.info("User id -> {}", userId);
         boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
         if (isRegisterValid) {

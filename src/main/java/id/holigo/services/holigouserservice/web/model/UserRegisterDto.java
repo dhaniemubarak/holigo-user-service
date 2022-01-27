@@ -36,4 +36,6 @@ public class UserRegisterDto {
 
     @NotBlank
     private String type;
+
+    private String referral;
 }

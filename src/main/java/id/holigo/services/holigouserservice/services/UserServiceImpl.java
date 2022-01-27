@@ -63,6 +63,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final OtpService otpService;
 
+    @Autowired
+    private final UserReferralService userReferralService;
+
     @Override
     @Transactional
     public UserDto findById(Long id) {
@@ -98,6 +101,7 @@ public class UserServiceImpl implements UserService {
         User userSaved = userRepository.save(user);
 
         if (userSaved.getId() != null) {
+            userReferralService.createRandomReferral(userSaved.getId());
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
             return userSaved;
