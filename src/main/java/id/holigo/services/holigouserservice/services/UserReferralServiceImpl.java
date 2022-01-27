@@ -12,6 +12,7 @@ import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
+import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import io.netty.util.internal.ThreadLocalRandom;
 
 @Service
@@ -25,7 +26,7 @@ public class UserReferralServiceImpl implements UserReferralService {
 
     @Transactional
     @Override
-    public void createRandomReferral(Long userId) {
+    public UserReferral createRandomReferral(Long userId) {
 
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findByUserId(userId);
         if (fetchUserReferral.isEmpty()) {
@@ -36,10 +37,13 @@ public class UserReferralServiceImpl implements UserReferralService {
                 userReferral.setUser(fetchUser.get());
                 userReferral.setReferral(referral);
                 userReferral.setStatus(ReferralStatusEnum.ACTIVE);
-                userReferralRepository.save(userReferral);
+                UserReferral savedUserReferral = userReferralRepository.save(userReferral);
+                return savedUserReferral;
+            } else {
+                throw new NotFoundException("User not found");
             }
         }
-
+        return fetchUserReferral.get();
     }
 
     private String generateRandomReferral(User user) {
