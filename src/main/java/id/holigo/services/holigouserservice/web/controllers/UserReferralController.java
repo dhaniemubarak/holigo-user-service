@@ -67,16 +67,18 @@ public class UserReferralController {
     @GetMapping("/api/v1/users/{userId}/userReferral")
     public ResponseEntity<UserReferralDto> getReferralFromUser(@PathVariable("userId") Long id,
             @RequestHeader("user-id") Long userId) {
+        UserReferral userReferral;
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findByUserId(id);
         if (fetchUserReferral.isPresent()) {
-            UserReferral userReferral = fetchUserReferral.get();
-            if (userReferral.getUser().getId().equals(userId)) {
-                return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(userReferral),
-                        HttpStatus.OK);
+            userReferral = fetchUserReferral.get();
+            if (!userReferral.getUser().getId().equals(userId)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } else {
+            userReferral = userReferralService.createRandomReferral(userId);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(userReferral),
+                HttpStatus.OK);
     }
 
     @GetMapping({ "/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}" })

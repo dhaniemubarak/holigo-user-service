@@ -16,8 +16,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -43,6 +47,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    @JsonBackReference
+    private User parent;
 
     @Column(length = 100, columnDefinition = "varchar(100)")
     private String name;
@@ -112,5 +121,8 @@ public class User {
     public void setPin(String value) {
         this.pin = new BCryptPasswordEncoder().encode(value);
     }
+
+    @Transient
+    private String referral;
 
 }

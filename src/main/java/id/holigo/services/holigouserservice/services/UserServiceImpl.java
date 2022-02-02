@@ -1,5 +1,6 @@
 package id.holigo.services.holigouserservice.services;
 
+import java.lang.StackWalker.Option;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
+import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
 import id.holigo.services.common.model.AccountStatusEnum;
@@ -25,12 +27,12 @@ import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
+import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
-import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
@@ -56,6 +58,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserDeviceRepository userDeviceRepository;
+
+    @Autowired
+    private final UserReferralRepository userReferralRepository;
 
     @Autowired
     final UserPersonalService userPersonalService;
@@ -85,13 +90,22 @@ public class UserServiceImpl implements UserService {
         if (savedUserPersonal.getId() == null) {
             throw new Exception("Failed save personal data");
         }
-        Optional<Authority> fetchAuth = authorityRepository.findById(2);
 
+        if (userDto.getReferral().length() > 0) {
+            Optional<UserReferral> fetchUserReferral = userReferralRepository.findByReferral(userDto.getReferral());
+            if (fetchUserReferral.isEmpty()) {
+                throw new NotFoundException("Referral not found");
+            }
+            UserReferral userReferral = fetchUserReferral.get();
+            userDto.setParent(userReferral.getUser());
+        }
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         user.setEmailStatus(INIT_EMAIL_STATUS);
         user.setUserPersonal(savedUserPersonal);
+
+        Optional<Authority> fetchAuth = authorityRepository.findById(2);
         if (fetchAuth.isPresent()) {
             Authority auth = fetchAuth.get();
             Set<Authority> roles = new HashSet<>();
@@ -142,12 +156,6 @@ public class UserServiceImpl implements UserService {
     public UserDto getByPhoneNumber(String phoneNumber) {
         return userMapper
                 .userToUserDto(userRepository.findByPhoneNumber(phoneNumber).orElseThrow(NotFoundException::new));
-    }
-
-    @Override
-    public UserRegisterDto createUserViaOtp(UserRegisterDto userRegisterDto) {
-        //
-        return null;
     }
 
     @Override

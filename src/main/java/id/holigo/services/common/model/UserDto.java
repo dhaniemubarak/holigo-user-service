@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
+import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
 import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,9 @@ public class UserDto implements Serializable {
     static final long serialVersionUID = -5815566940065181210L;
     @Null
     private Long id;
+
+    @Null
+    private User parent;
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100)
@@ -48,6 +52,8 @@ public class UserDto implements Serializable {
     private String type;
 
     private Long registerId;
+
+    private String referral;
 
     List<UserDeviceDto> userDevices;
 

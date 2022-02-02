@@ -3,7 +3,6 @@ package id.holigo.services.holigouserservice.services;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
-import id.holigo.services.holigouserservice.web.model.UserRegisterDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
@@ -12,8 +11,6 @@ public interface UserService {
     UserDto findById(Long id);
 
     User save(UserDto userDto) throws Exception;
-
-    UserRegisterDto createUserViaOtp(UserRegisterDto userRegisterDto);
 
     UserDto update(Long id, UserDto userDto);
 
