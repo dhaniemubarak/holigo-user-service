@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>id.holigo.services</groupId>
 	<artifactId>holigo-user-service</artifactId>
-	<version>1.2.0</version>
+	<version>1.3.0</version>
 	<name>holigo-user-service</name>
 	<description>Holigo user service</description>
 	<properties>
@@ -76,8 +76,8 @@
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>org.springframework.cloud</groupId>
-    		<artifactId>spring-cloud-starter-sleuth</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
