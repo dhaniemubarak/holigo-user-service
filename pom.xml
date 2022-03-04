@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>id.holigo.services</groupId>
 	<artifactId>holigo-user-service</artifactId>
-	<version>1.3.0</version>
+	<version>1.3.1</version>
 	<name>holigo-user-service</name>
 	<description>Holigo user service</description>
 	<properties>
@@ -91,6 +91,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-artemis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.logstash.logback</groupId>
+			<artifactId>logstash-logback-encoder</artifactId>
+			<version>7.0.1</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
