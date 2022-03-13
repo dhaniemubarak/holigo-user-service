@@ -28,6 +28,9 @@ public class UserDto implements Serializable {
     private Long id;
 
     @Null
+    private User official;
+
+    @Null
     private User parent;
 
     @NotBlank(message = "Name is required")

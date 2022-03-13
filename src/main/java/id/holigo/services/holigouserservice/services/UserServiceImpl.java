@@ -96,7 +96,14 @@ public class UserServiceImpl implements UserService {
                 throw new NotFoundException("Referral not found");
             }
             UserReferral userReferral = fetchUserReferral.get();
-            userDto.setParent(userReferral.getUser());
+
+            User official = null;
+            User parent = userReferral.getUser();
+            if (parent.getOfficial() != null) {
+                official = parent.getOfficial();
+            }
+            userDto.setOfficial(official);
+            userDto.setParent(parent);
         }
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");

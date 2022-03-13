@@ -51,6 +51,11 @@ public class User {
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
     @JsonBackReference
+    private User official;
+
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    @JsonBackReference
     private User parent;
 
     @Column(length = 100, columnDefinition = "varchar(100)")
