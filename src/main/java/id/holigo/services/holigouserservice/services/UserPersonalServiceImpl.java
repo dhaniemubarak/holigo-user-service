@@ -139,7 +139,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         if (savedUserPersonalPhotoProfile.getId() == null) {
             throw new Exception("Failed save photo profile");
         }
-        userPersonal.setPhotoProfil(savedUserPersonalPhotoProfile);
+        userPersonal.setPhotoProfile(savedUserPersonalPhotoProfile);
         userPersonalRepository.save(userPersonal);
         return userPersonalPhotoProfileMapper
                 .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(savedUserPersonalPhotoProfile);
@@ -161,9 +161,9 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         }
         UserPersonalPhotoProfile userPersonalPhotoProfil = fetchUserPersonalPhotoProfile.get();
         UserPersonal userPersonal = userPersonalPhotoProfil.getUserPersonal();
-        userPersonal.setPhotoProfil(null);
+        userPersonal.setPhotoProfile(null);
         UserPersonal updatedUserPersonal = userPersonalRepository.save(userPersonal);
-        if (updatedUserPersonal.getPhotoProfil() == null) {
+        if (updatedUserPersonal.getPhotoProfile() == null) {
             isDeleted = fileStorageService.deleteFile(userPersonalPhotoProfil.getFileName());
             if (isDeleted) {
                 userPersonalPhotoProfileRepository.deleteById(userPersonalPhotoProfil.getId());
