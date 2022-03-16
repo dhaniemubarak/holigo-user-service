@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserPersonalPhotoProfilDto {
+public class UserPersonalPhotoProfileDto {
 
     @Null
     private Long id;

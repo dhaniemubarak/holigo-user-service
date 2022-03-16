@@ -24,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-public class UserPersonalPhotoProfil {
+public class UserPersonalPhotoProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

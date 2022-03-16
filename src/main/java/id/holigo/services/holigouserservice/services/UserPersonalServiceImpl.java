@@ -11,7 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
-import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfil;
+import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfile;
 import id.holigo.services.holigouserservice.repositories.UserPersonalPhotoProfileRepository;
 import id.holigo.services.holigouserservice.repositories.UserPersonalRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
@@ -20,7 +20,7 @@ import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserPersonalMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserPersonalPhotoProfileMapper;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
-import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
+import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -117,7 +117,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
 
     @Transactional
     @Override
-    public UserPersonalPhotoProfilDto savePhotoProfile(Long personalId, MultipartFile file) throws Exception {
+    public UserPersonalPhotoProfileDto savePhotoProfile(Long personalId, MultipartFile file) throws Exception {
         Optional<UserPersonal> fetchUserPersonal = userPersonalRepository.findById(personalId);
         if (fetchUserPersonal.isEmpty()) {
             throw new NotFoundException("Personal data not found");
@@ -128,13 +128,13 @@ public class UserPersonalServiceImpl implements UserPersonalService {
                 .path("/api/v1/users/" + Long.toString(userPersonal.getUser().getId()) + "/photoProfile/")
                 .path(fileName).toUriString();
 
-        UserPersonalPhotoProfil userPersonalPhotoProfil = new UserPersonalPhotoProfil();
+        UserPersonalPhotoProfile userPersonalPhotoProfil = new UserPersonalPhotoProfile();
         userPersonalPhotoProfil.setFileName(fileName);
         userPersonalPhotoProfil.setFileDownloadUri(fileDownloadUri);
         userPersonalPhotoProfil.setFileType(file.getContentType());
         userPersonalPhotoProfil.setSize(file.getSize());
 
-        UserPersonalPhotoProfil savedUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
+        UserPersonalPhotoProfile savedUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
                 .save(userPersonalPhotoProfil);
         if (savedUserPersonalPhotoProfile.getId() == null) {
             throw new Exception("Failed save photo profile");
@@ -154,12 +154,12 @@ public class UserPersonalServiceImpl implements UserPersonalService {
     @Override
     public boolean deletePhotoProfile(Long photoProfileId) {
         boolean isDeleted = false;
-        Optional<UserPersonalPhotoProfil> fetchUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
+        Optional<UserPersonalPhotoProfile> fetchUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchUserPersonalPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo ptofile not found");
         }
-        UserPersonalPhotoProfil userPersonalPhotoProfil = fetchUserPersonalPhotoProfile.get();
+        UserPersonalPhotoProfile userPersonalPhotoProfil = fetchUserPersonalPhotoProfile.get();
         UserPersonal userPersonal = userPersonalPhotoProfil.getUserPersonal();
         userPersonal.setPhotoProfil(null);
         UserPersonal updatedUserPersonal = userPersonalRepository.save(userPersonal);

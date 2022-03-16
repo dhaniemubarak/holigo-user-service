@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
-import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
+import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 
 public interface UserPersonalService {
     UserPersonalDto getUserPersonalByUserId(Long userId);
@@ -16,7 +16,7 @@ public interface UserPersonalService {
 
     UserPersonalDto updateUserPersonal(Long personalId, UserPersonalDto userPersonalDto);
 
-    UserPersonalPhotoProfilDto savePhotoProfile(Long personalId, MultipartFile file) throws Exception;
+    UserPersonalPhotoProfileDto savePhotoProfile(Long personalId, MultipartFile file) throws Exception;
 
     Resource getPhotoProfile(String fileName);
 
