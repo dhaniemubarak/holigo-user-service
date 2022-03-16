@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
+import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.repositories.UserPersonalRepository;
@@ -41,7 +42,7 @@ public class UserReferralServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder().id(1L).name("John Doe").email("johnDoe@gmail.com").emailStatus(EmailStatusEnum.CONFIRMED)
-                .type("USER").phoneNumber("085718187373").build();
+                .type("USER").phoneNumber("085718187373").userGroup(UserGroupEnum.MEMBER).build();
         userPersonal = UserPersonal.builder().id(1L).name("John Doe").phoneNumber("085718187373")
                 .email("johnDoe@gmail.com").build();
     }

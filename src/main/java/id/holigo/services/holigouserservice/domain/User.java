@@ -9,6 +9,7 @@ import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -71,6 +72,9 @@ public class User {
 
     private AccountStatusEnum accountStatus;
 
+    @Convert(converter = UserGroupEnumConverter.class)
+    private UserGroupEnum userGroup;
+
     @Nullable
     private Timestamp emailVerifiedAt;
 
@@ -129,5 +133,6 @@ public class User {
 
     @Transient
     private String referral;
+    // @Convert(converter = UserGroupEnumConverter.class)
 
 }

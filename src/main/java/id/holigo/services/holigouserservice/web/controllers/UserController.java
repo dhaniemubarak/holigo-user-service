@@ -36,7 +36,7 @@ import id.holigo.services.common.model.OtpDto;
 import id.holigo.services.common.model.UserAuthenticationDto;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfil;
+import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfile;
 import id.holigo.services.holigouserservice.repositories.UserPersonalPhotoProfileRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.UserDeviceService;
@@ -50,7 +50,7 @@ import id.holigo.services.holigouserservice.web.mappers.UserPersonalPhotoProfile
 import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
 import id.holigo.services.holigouserservice.web.model.UserPaginate;
 import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
-import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
+import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
@@ -229,11 +229,11 @@ public class UserController {
     public ResponseEntity<?> uploadPhotoProfile(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
         // String fileName = fileStorageService.storeFile(file);
-        UserPersonalPhotoProfilDto userPersonalPhotoProfilDto = userPersonalService.savePhotoProfile(personalId, file);
+        UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalService.savePhotoProfile(personalId, file);
 
         String locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/v1/users/" + Long.toString(id) + "/userPersonal/" + personalId + "/photoProfile/"
-                        + userPersonalPhotoProfilDto.getId())
+                        + userPersonalPhotoProfileDto.getId())
                 .toUriString();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Location", locationUri);
@@ -242,9 +242,9 @@ public class UserController {
     }
 
     @GetMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
-    public ResponseEntity<UserPersonalPhotoProfilDto> getPhotoProfileData(@PathVariable("id") Long id,
+    public ResponseEntity<UserPersonalPhotoProfileDto> getPhotoProfileData(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
-        Optional<UserPersonalPhotoProfil> fetchPhotoProfile = userPersonalPhotoProfileRepository
+        Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo profile not found");
@@ -256,7 +256,7 @@ public class UserController {
     @DeleteMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
     public ResponseEntity<?> deletePhotoProfile(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
-        Optional<UserPersonalPhotoProfil> fetchPhotoProfile = userPersonalPhotoProfileRepository
+        Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo profile not found");

@@ -13,6 +13,7 @@ import id.holigo.services.common.model.AccountStatusEnum;
 import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
+import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
@@ -52,6 +53,7 @@ public class GuestServiceImpl implements GuestService {
         user.setName(name);
         user.setType("GUEST");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
+        user.setUserGroup(UserGroupEnum.MEMBER);
         user.addUserDevice(userDevice);
 
         if (fetchAuth.isPresent()) {

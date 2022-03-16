@@ -5,13 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
@@ -25,6 +22,7 @@ import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
+import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
@@ -89,22 +87,7 @@ public class UserServiceImpl implements UserService {
         if (savedUserPersonal.getId() == null) {
             throw new Exception("Failed save personal data");
         }
-
-        if (userDto.getReferral().length() > 0) {
-            Optional<UserReferral> fetchUserReferral = userReferralRepository.findByReferral(userDto.getReferral());
-            if (fetchUserReferral.isEmpty()) {
-                throw new NotFoundException("Referral not found");
-            }
-            UserReferral userReferral = fetchUserReferral.get();
-
-            User official = null;
-            User parent = userReferral.getUser();
-            if (parent.getOfficial() != null) {
-                official = parent.getOfficial();
-            }
-            userDto.setOfficial(official);
-            userDto.setParent(parent);
-        }
+        userDto = fetchReferral(userDto);
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
@@ -136,7 +119,10 @@ public class UserServiceImpl implements UserService {
         resultUser.setName(userDto.getName());
         resultUser.setEmail(userDto.getEmail());
         resultUser.setPhoneNumber(userDto.getPhoneNumber());
-        resultUser.setType(userDto.getType());
+        // resultUser.setType(userDto.getType());
+        if (resultUser.getParent() != null) {
+            userDto = fetchReferral(userDto);
+        }
         return userMapper.userToUserDto(userRepository.save(resultUser));
     }
 
@@ -264,6 +250,32 @@ public class UserServiceImpl implements UserService {
             throw new ForbiddenException("OTP is wrong!");
         }
         return userMapper.userToUserDto(user);
+    }
+
+    private UserDto fetchReferral(UserDto userDto) {
+        userDto.setUserGroup(UserGroupEnum.MEMBER);
+        if (userDto.getReferral().length() > 0) {
+            UserReferral userReferral = null;
+            User parent = null;
+            User official = null;
+            userReferral = userReferralRepository.findByReferral(userDto.getReferral())
+                    .orElseThrow();
+            // if (fetchUserReferral.isEmpty()) {
+            // throw new NotFoundException("Referral not found");
+            // }
+            // UserReferral userReferral = fetchUserReferral.get();
+
+            if (userReferral != null) {
+                userDto.setUserGroup(UserGroupEnum.NETIZEN);
+                parent = userReferral.getUser();
+            }
+            if (parent.getOfficial() != null) {
+                official = parent.getOfficial();
+            }
+            userDto.setOfficial(official);
+            userDto.setParent(parent);
+        }
+        return userDto;
     }
 
 }
