@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import id.holigo.services.common.model.AccountStatusEnum;
+import id.holigo.services.common.model.UserGroupEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+import id.holigo.services.common.model.UserGroupEnum;
+
 @Converter(autoApply = true)
 public class UserGroupEnumConverter implements AttributeConverter<UserGroupEnum, Integer> {
 

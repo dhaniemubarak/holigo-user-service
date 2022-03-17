@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import id.holigo.services.common.model.UserGroupEnum;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.repositories.UserPersonalRepository;
