@@ -49,6 +49,8 @@ public class OauthUserListener {
             userAuthenticationDto.setEnabled(user.getEnabled());
             userAuthenticationDto.setAccountNonLocked(user.getAccountNonLocked());
             userAuthenticationDto.setAuthorities(authorities);
+            userAuthenticationDto.setUserGroup(user.getUserGroup());
+            userAuthenticationDto.setType(user.getType());
         }
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userAuthenticationDto);
     }

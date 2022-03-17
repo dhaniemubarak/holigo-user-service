@@ -128,14 +128,14 @@ public class UserPersonalServiceImpl implements UserPersonalService {
                 .path("/api/v1/users/" + Long.toString(userPersonal.getUser().getId()) + "/photoProfile/")
                 .path(fileName).toUriString();
 
-        UserPersonalPhotoProfile userPersonalPhotoProfil = new UserPersonalPhotoProfile();
-        userPersonalPhotoProfil.setFileName(fileName);
-        userPersonalPhotoProfil.setFileDownloadUri(fileDownloadUri);
-        userPersonalPhotoProfil.setFileType(file.getContentType());
-        userPersonalPhotoProfil.setSize(file.getSize());
+        UserPersonalPhotoProfile userPersonalPhotoProfile = new UserPersonalPhotoProfile();
+        userPersonalPhotoProfile.setFileName(fileName);
+        userPersonalPhotoProfile.setFileDownloadUri(fileDownloadUri);
+        userPersonalPhotoProfile.setFileType(file.getContentType());
+        userPersonalPhotoProfile.setSize(file.getSize());
 
         UserPersonalPhotoProfile savedUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
-                .save(userPersonalPhotoProfil);
+                .save(userPersonalPhotoProfile);
         if (savedUserPersonalPhotoProfile.getId() == null) {
             throw new Exception("Failed save photo profile");
         }
@@ -157,7 +157,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         Optional<UserPersonalPhotoProfile> fetchUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchUserPersonalPhotoProfile.isEmpty()) {
-            throw new NotFoundException("Photo ptofile not found");
+            throw new NotFoundException("Photo profile not found");
         }
         UserPersonalPhotoProfile userPersonalPhotoProfil = fetchUserPersonalPhotoProfile.get();
         UserPersonal userPersonal = userPersonalPhotoProfil.getUserPersonal();

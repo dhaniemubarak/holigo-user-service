@@ -9,7 +9,6 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
 import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
 import lombok.AllArgsConstructor;

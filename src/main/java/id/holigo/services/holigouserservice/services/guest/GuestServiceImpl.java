@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import id.holigo.services.common.model.AccountStatusEnum;
+import id.holigo.services.common.model.UserGroupEnum;
 import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
-import id.holigo.services.holigouserservice.domain.UserGroupEnum;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;

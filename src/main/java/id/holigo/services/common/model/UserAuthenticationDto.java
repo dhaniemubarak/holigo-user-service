@@ -33,5 +33,7 @@ public class UserAuthenticationDto {
 
     private Boolean enabled;
 
+    private UserGroupEnum userGroup;
+
 
 }

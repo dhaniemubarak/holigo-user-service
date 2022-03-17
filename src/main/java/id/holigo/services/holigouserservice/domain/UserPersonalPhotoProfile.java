@@ -45,7 +45,7 @@ public class UserPersonalPhotoProfile {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @OneToOne(mappedBy = "photoProfil")
+    @OneToOne(mappedBy = "photoProfile")
     private UserPersonal userPersonal;
 
 }
