@@ -69,7 +69,7 @@ public class UserServiceTest {
 
         userReferral = User.builder().id(1L).name("John Doe").email("johnDoe@gmail.com")
                 .emailStatus(EmailStatusEnum.CONFIRMED)
-                .type("USER").phoneNumber("085718187373").official(officialUser).build();
+                .type("USER").phoneNumber("085718187373").officialId(officialUser.getId()).build();
         userPersonalReferral = UserPersonal.builder().id(1L).name("John Doe").phoneNumber("085718187373")
                 .email("johnDoe@gmail.com").build();
         referralUser = UserReferral.builder().id(10L).referral("johndoe").build();
@@ -89,8 +89,8 @@ public class UserServiceTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        assertEquals(savedUser.getOfficial().getId(), officialUser.getId());
+        assertEquals(savedUser.getOfficialId(), officialUser.getId());
         assertEquals(savedUser.getId(), createUser.getParent().getId());
-        assertEquals(savedUser.getOfficial().getId(), createUser.getOfficial().getId());
+        assertEquals(savedUser.getOfficialId(), createUser.getOfficialId());
     }
 }

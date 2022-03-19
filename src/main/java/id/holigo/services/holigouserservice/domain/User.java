@@ -50,10 +50,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "id")
-    @JsonBackReference
-    private User official;
+    private Long officialId;
 
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")

@@ -257,7 +257,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getReferral().length() > 0) {
             UserReferral userReferral = null;
             User parent = null;
-            User official = null;
+            Long officialId = null;
             userReferral = userReferralRepository.findByReferral(userDto.getReferral())
                     .orElseThrow();
             // if (fetchUserReferral.isEmpty()) {
@@ -269,10 +269,10 @@ public class UserServiceImpl implements UserService {
                 userDto.setUserGroup(UserGroupEnum.NETIZEN);
                 parent = userReferral.getUser();
             }
-            if (parent.getOfficial() != null) {
-                official = parent.getOfficial();
+            if (parent.getOfficialId() != null) {
+                officialId = parent.getOfficialId();
             }
-            userDto.setOfficial(official);
+            userDto.setOfficialId(officialId);
             userDto.setParent(parent);
         }
         return userDto;
