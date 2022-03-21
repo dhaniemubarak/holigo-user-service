@@ -59,7 +59,8 @@ public class GuestController {
                     .authorities(authorities).oneTimePassword("0921")
                     .accountNonExpired(guest.getAccountNonExpired())
                     .accountNonLocked(guest.getAccountNonLocked())
-                    .credentialsNonExpired(guest.getCredentialsNonExpired()).enabled(guest.getEnabled()).build();
+                    .credentialsNonExpired(guest.getCredentialsNonExpired()).enabled(guest.getEnabled())
+                    .userGroup(guest.getUserGroup()).build();
 
             oauthAccessTokenDto = oauthService.createAccessToken(userAuthenticationDto);
             guest.setPhoneNumber(null);
