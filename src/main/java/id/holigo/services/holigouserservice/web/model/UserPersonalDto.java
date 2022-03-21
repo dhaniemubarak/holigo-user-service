@@ -29,5 +29,5 @@ public class UserPersonalDto {
 
     private String city;
 
-    private UserPersonalPhotoProfilDto photoProfil;
+    private UserPersonalPhotoProfileDto photoProfile;
 }

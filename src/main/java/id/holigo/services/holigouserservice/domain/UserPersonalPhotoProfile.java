@@ -24,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-public class UserPersonalPhotoProfil {
+public class UserPersonalPhotoProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +45,7 @@ public class UserPersonalPhotoProfil {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @OneToOne(mappedBy = "photoProfil")
+    @OneToOne(mappedBy = "photoProfile")
     private UserPersonal userPersonal;
 
 }

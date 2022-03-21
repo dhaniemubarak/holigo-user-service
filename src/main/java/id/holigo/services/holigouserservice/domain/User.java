@@ -9,6 +9,7 @@ import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,6 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import id.holigo.services.common.model.AccountStatusEnum;
+import id.holigo.services.common.model.UserGroupEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,6 +50,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    private Long officialId;
+
     @ManyToOne
     @JoinColumn(referencedColumnName = "id")
     @JsonBackReference
@@ -65,6 +69,9 @@ public class User {
     private EmailStatusEnum emailStatus;
 
     private AccountStatusEnum accountStatus;
+
+    @Convert(converter = UserGroupEnumConverter.class)
+    private UserGroupEnum userGroup;
 
     @Nullable
     private Timestamp emailVerifiedAt;
@@ -124,5 +131,6 @@ public class User {
 
     @Transient
     private String referral;
+    // @Convert(converter = UserGroupEnumConverter.class)
 
 }

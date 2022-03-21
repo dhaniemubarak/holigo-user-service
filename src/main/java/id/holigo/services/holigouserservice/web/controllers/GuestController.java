@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import id.holigo.services.common.model.OauthAccessTokenDto;
 import id.holigo.services.common.model.UserAuthenticationDto;
+import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.services.UserService;
 import id.holigo.services.holigouserservice.services.guest.GuestService;
@@ -68,5 +71,11 @@ public class GuestController {
             return new ResponseEntity<>(oauthAccessTokenDto, httpHeaders, HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/api/v1/guests/{id}")
+    public ResponseEntity<UserDto> getGuest(@PathVariable("id") Long id) {
+        UserDto user = userService.findById(id);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }

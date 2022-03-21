@@ -2,14 +2,14 @@ package id.holigo.services.holigouserservice.web.mappers;
 
 import org.mapstruct.Mapper;
 
-import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfil;
-import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfilDto;
+import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfile;
+import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 
 @Mapper
 public interface UserPersonalPhotoProfileMapper {
-    UserPersonalPhotoProfil userPersonalPhotoProfileDtoToUserPersonalPhotoProfile(
-            UserPersonalPhotoProfilDto userPersonalPhotoProfilDto);
+    UserPersonalPhotoProfile userPersonalPhotoProfileDtoToUserPersonalPhotoProfile(
+            UserPersonalPhotoProfileDto userPersonalPhotoProfilDto);
 
-    UserPersonalPhotoProfilDto userPersonalPhotoProfileToUserPersonalPhotoProfileDto(
-            UserPersonalPhotoProfil userPersonalPhotoProfil);
+    UserPersonalPhotoProfileDto userPersonalPhotoProfileToUserPersonalPhotoProfileDto(
+            UserPersonalPhotoProfile userPersonalPhotoProfil);
 }

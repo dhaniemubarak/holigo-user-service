@@ -50,6 +50,8 @@ public class UserServiceTest {
 
     User createUser;
 
+    User officialUser;
+
     List<UserDeviceDto> devices = new ArrayList<>();
 
     @BeforeEach
@@ -61,12 +63,17 @@ public class UserServiceTest {
         userDto = UserDto.builder().email("budi@gmail.com").id(10L).name("Budi").phoneNumber("62812345678")
                 .mobileToken("srpigouvhenprmacuhmeipruhmcweogtmv9htpwevothieht3q493534tbn").referral("johndoe")
                 .userDevices(devices).build();
+        User officialUserData = User.builder().email("zam@gmail.com").id(3L).name("Zam").phoneNumber("629817726354")
+                .mobileToken("9htpwevothieht3q493534tbn").build();
+        officialUser = userRepository.save(officialUserData);
+
         userReferral = User.builder().id(1L).name("John Doe").email("johnDoe@gmail.com")
                 .emailStatus(EmailStatusEnum.CONFIRMED)
-                .type("USER").phoneNumber("085718187373").build();
+                .type("USER").phoneNumber("085718187373").officialId(officialUser.getId()).build();
         userPersonalReferral = UserPersonal.builder().id(1L).name("John Doe").phoneNumber("085718187373")
                 .email("johnDoe@gmail.com").build();
         referralUser = UserReferral.builder().id(10L).referral("johndoe").build();
+
     }
 
     @Transactional
@@ -82,6 +89,8 @@ public class UserServiceTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        assertEquals(savedUser.getOfficialId(), officialUser.getId());
         assertEquals(savedUser.getId(), createUser.getParent().getId());
+        assertEquals(savedUser.getOfficialId(), createUser.getOfficialId());
     }
 }

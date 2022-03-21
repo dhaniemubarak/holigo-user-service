@@ -28,6 +28,9 @@ public class UserDto implements Serializable {
     private Long id;
 
     @Null
+    private Long officialId;
+
+    @Null
     private User parent;
 
     @NotBlank(message = "Name is required")
@@ -54,6 +57,8 @@ public class UserDto implements Serializable {
     private Long registerId;
 
     private String referral;
+
+    private UserGroupEnum userGroup;
 
     List<UserDeviceDto> userDevices;
 

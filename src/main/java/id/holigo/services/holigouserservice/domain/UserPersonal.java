@@ -58,5 +58,5 @@ public class UserPersonal {
     private Timestamp updatedAt;
 
     @OneToOne
-    private UserPersonalPhotoProfil photoProfil;
+    private UserPersonalPhotoProfile photoProfile;
 }
