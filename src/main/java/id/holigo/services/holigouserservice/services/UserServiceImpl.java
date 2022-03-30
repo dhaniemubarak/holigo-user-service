@@ -254,7 +254,7 @@ public class UserServiceImpl implements UserService {
 
     private UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
-        if (userDto.getReferral().length() > 0) {
+        if (userDto.getReferral() != null) {
             UserReferral userReferral = null;
             User parent = null;
             Long officialId = null;
