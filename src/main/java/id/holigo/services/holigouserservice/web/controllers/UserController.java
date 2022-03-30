@@ -113,7 +113,6 @@ public class UserController {
     @PostMapping(produces = "application/json", path = { "/api/v1/users" })
     public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto,
             @RequestHeader(value = "user-id") Long userId) throws Exception {
-        log.info("User id -> {}", userId);
         boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
         if (isRegisterValid) {
             OauthAccessTokenDto oauthAccessTokenDto = null;
@@ -131,6 +130,7 @@ public class UserController {
                     .type(savedUser.getType()).authorities(authorities).oneTimePassword("0921")
                     .accountNonExpired(savedUser.getAccountNonExpired())
                     .accountNonLocked(savedUser.getAccountNonLocked())
+                    .userGroup(savedUser.getUserGroup())
                     .credentialsNonExpired(savedUser.getCredentialsNonExpired()).enabled(savedUser.getEnabled())
                     .build();
             oauthAccessTokenDto = oauthService.createAccessToken(userAuthenticationDto);
@@ -229,7 +229,8 @@ public class UserController {
     public ResponseEntity<?> uploadPhotoProfile(@PathVariable("id") Long id,
             @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
         // String fileName = fileStorageService.storeFile(file);
-        UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalService.savePhotoProfile(personalId, file);
+        UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalService.savePhotoProfile(personalId,
+                file);
 
         String locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/v1/users/" + Long.toString(id) + "/userPersonal/" + personalId + "/photoProfile/"
