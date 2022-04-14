@@ -15,6 +15,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import id.holigo.services.common.events.UserGroupEvent;
+import id.holigo.services.common.model.UpdateUserGroupDto;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.config.JmsConfig;
 import id.holigo.services.holigouserservice.domain.User;
@@ -59,4 +61,11 @@ public class UserListener {
         jmsTemplate.convertAndSend(message.getJMSReplyTo(), userDto);
     }
 
+    @JmsListener(destination = JmsConfig.UPDATE_USER_GROUP_IN_USER_QUEUE)
+    public void listenForUpdateUserGroup(UserGroupEvent userGroupEvent) {
+        UpdateUserGroupDto updateUserGroupDto = userGroupEvent.getUpdateUserGroupDto();
+        User user = userRepository.getById(updateUserGroupDto.getUserId());
+        user.setUserGroup(updateUserGroupDto.getUserGroup());
+        userRepository.save(user);
+    }
 }
