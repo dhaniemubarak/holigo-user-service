@@ -5,20 +5,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+
+import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
+import id.holigo.services.holigouserservice.services.point.PointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import id.holigo.services.common.model.UserDto;
-import id.holigo.services.common.model.UserGroupEnum;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
-import id.holigo.services.common.model.AccountStatusEnum;
-import id.holigo.services.common.model.OtpDto;
-import id.holigo.services.common.model.OtpStatusEnum;
 import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
@@ -34,6 +32,8 @@ import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
+
+import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -67,6 +67,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserReferralService userReferralService;
+
+    @Autowired
+    private final HoliclubService holiclubService;
+
+    @Autowired
+    private final PointService pointService;
 
     @Override
     @Transactional
@@ -105,6 +111,10 @@ public class UserServiceImpl implements UserService {
 
         if (userSaved.getId() != null) {
             if (userSaved.getParent() != null) {
+                pointService.createPoint(userSaved.getId());
+                holiclubService.createUserClub(UserClubDto.builder()
+                        .userId(userSaved.getId())
+                        .userGroup(UserGroupEnum.NETIZEN).build());
                 userReferralService.createRandomReferral(userSaved.getId());
             }
             userDevice.setUser(userSaved);
