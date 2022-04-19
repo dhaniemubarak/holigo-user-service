@@ -104,7 +104,9 @@ public class UserServiceImpl implements UserService {
         User userSaved = userRepository.save(user);
 
         if (userSaved.getId() != null) {
-            userReferralService.createRandomReferral(userSaved.getId());
+            if (userSaved.getParent() != null) {
+                userReferralService.createRandomReferral(userSaved.getId());
+            }
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
             return userSaved;
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
         resultUser.setPhoneNumber(userDto.getPhoneNumber());
         // resultUser.setType(userDto.getType());
         if (resultUser.getParent() != null) {
-            userDto = fetchReferral(userDto);
+            fetchReferral(userDto);
         }
         return userMapper.userToUserDto(userRepository.save(resultUser));
     }
@@ -252,7 +254,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(user);
     }
 
-    private UserDto fetchReferral(UserDto userDto) {
+    public UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
         if (userDto.getReferral() != null) {
             UserReferral userReferral = null;
@@ -260,15 +262,9 @@ public class UserServiceImpl implements UserService {
             Long officialId = null;
             userReferral = userReferralRepository.findByReferral(userDto.getReferral())
                     .orElseThrow();
-            // if (fetchUserReferral.isEmpty()) {
-            // throw new NotFoundException("Referral not found");
-            // }
-            // UserReferral userReferral = fetchUserReferral.get();
 
-            if (userReferral != null) {
-                userDto.setUserGroup(UserGroupEnum.NETIZEN);
-                parent = userReferral.getUser();
-            }
+            userDto.setUserGroup(UserGroupEnum.NETIZEN);
+            parent = userReferral.getUser();
             if (parent.getOfficialId() != null) {
                 officialId = parent.getOfficialId();
             }

@@ -10,6 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.services.*;
+import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
+import id.holigo.services.holigouserservice.services.point.PointService;
+import id.holigo.services.holigouserservice.web.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,26 +37,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import id.holigo.services.common.model.OauthAccessTokenDto;
-import id.holigo.services.common.model.OtpDto;
-import id.holigo.services.common.model.UserAuthenticationDto;
-import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserPersonalPhotoProfile;
 import id.holigo.services.holigouserservice.repositories.UserPersonalPhotoProfileRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
-import id.holigo.services.holigouserservice.services.UserDeviceService;
-import id.holigo.services.holigouserservice.services.UserPersonalService;
-import id.holigo.services.holigouserservice.services.UserService;
 import id.holigo.services.holigouserservice.services.oauth.OauthService;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserMapper;
 import id.holigo.services.holigouserservice.web.mappers.UserPersonalPhotoProfileMapper;
-import id.holigo.services.holigouserservice.web.model.UserDevicePaginate;
-import id.holigo.services.holigouserservice.web.model.UserPaginate;
-import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
-import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
@@ -90,6 +85,15 @@ public class UserController {
     @Autowired
     private final OauthService oauthService;
 
+    @Autowired
+    private final PointService pointService;
+
+    @Autowired
+    private final HoliclubService holiclubService;
+
+    @Autowired
+    private final UserReferralService userReferralService;
+
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
     private static final Integer DEFAULT_PAGE_SIZE = 25;
 
@@ -105,14 +109,14 @@ public class UserController {
         return users;
     }
 
-    @GetMapping(path = { "/api/v1/users" })
+    @GetMapping(path = {"/api/v1/users"})
     public ResponseEntity<UserPaginate> getAllUser() {
         return new ResponseEntity<>(userService.getAllUser(), HttpStatus.OK);
     }
 
-    @PostMapping(produces = "application/json", path = { "/api/v1/users" })
+    @PostMapping(produces = "application/json", path = {"/api/v1/users"})
     public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto,
-            @RequestHeader(value = "user-id") Long userId) throws Exception {
+                                                        @RequestHeader(value = "user-id") Long userId) throws Exception {
         boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
         if (isRegisterValid) {
             OauthAccessTokenDto oauthAccessTokenDto = null;
@@ -142,21 +146,21 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    @PutMapping(path = { "/api/v1/users/{id}" })
+    @PutMapping(path = {"/api/v1/users/{id}"})
     public ResponseEntity<UserDto> updateUser(@NotNull @PathVariable("id") Long id,
-            @Valid @RequestBody UserDto userDto) {
+                                              @Valid @RequestBody UserDto userDto) {
         return new ResponseEntity<UserDto>(userService.update(id, userDto), HttpStatus.OK);
     }
 
-    @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}" })
+    @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}"})
     public ResponseEntity<UserDto> getUser(@NotNull @PathVariable("id") Long id) {
         return new ResponseEntity<UserDto>(userService.findById(id), HttpStatus.OK);
     }
 
-    @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}/userDevices" })
+    @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}/userDevices"})
     public ResponseEntity<UserDevicePaginate> getUserDevices(@NotNull @PathVariable("id") Long id,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
+                                                             @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                             @RequestParam(value = "pageNumber", required = false) Integer pageNumber) {
         if (pageNumber == null || pageNumber < 0) {
             pageNumber = DEFAULT_PAGE_NUMBER;
         }
@@ -167,7 +171,7 @@ public class UserController {
         return new ResponseEntity<>(userDevicePaginate, HttpStatus.OK);
     }
 
-    @GetMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal" })
+    @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}/userPersonal"})
     public ResponseEntity<UserPersonalDto> getUserPersonal(@PathVariable("id") Long id) {
         UserPersonalDto result = userPersonalService.getUserPersonalByUserId(id);
         if (result == null) {
@@ -176,22 +180,22 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal" })
+    @PostMapping(produces = "application/json", path = {"/api/v1/users/{id}/userPersonal"})
     public ResponseEntity<UserPersonalDto> createUserPersonal(@PathVariable("id") Long id,
-            @RequestBody UserPersonalDto userPersonalDto) throws Exception {
+                                                              @RequestBody UserPersonalDto userPersonalDto) throws Exception {
         return new ResponseEntity<>(userPersonalService.createUserPersonalByUserId(id, userPersonalDto),
                 HttpStatus.CREATED);
 
     }
 
-    @PutMapping(produces = "application/json", path = { "/api/v1/users/{id}/userPersonal/{personalId}" })
+    @PutMapping(produces = "application/json", path = {"/api/v1/users/{id}/userPersonal/{personalId}"})
     public ResponseEntity<UserPersonalDto> updateUserPersonal(@PathVariable("id") Long id,
-            @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
+                                                              @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
         return new ResponseEntity<>(userPersonalService.updateUserPersonal(personalId, userPersonalDto), HttpStatus.OK);
 
     }
 
-    @GetMapping(path = { "/api/v1/users/{id}/pin" })
+    @GetMapping(path = {"/api/v1/users/{id}/pin"})
     public ResponseEntity<UserDto> pinCheckAvailability(@PathVariable("id") Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
@@ -204,30 +208,30 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping(path = { "/api/v1/users/{id}/pin" })
+    @PostMapping(path = {"/api/v1/users/{id}/pin"})
     public ResponseEntity<UserDto> createNewPin(@PathVariable("id") Long id,
-            @Valid @RequestBody CreateNewPin createNewPin) throws Exception {
+                                                @Valid @RequestBody CreateNewPin createNewPin) throws Exception {
         userService.createNewPin(id, createNewPin);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping(path = { "/api/v1/users/{id}/pin" })
+    @PutMapping(path = {"/api/v1/users/{id}/pin"})
     public ResponseEntity<UserDto> updatePin(@PathVariable("id") Long id, @Valid @RequestBody ChangePin changePin)
             throws Exception {
         userService.updatePin(id, changePin);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping(path = { "/api/v1/users/{id}/resetPin" })
+    @PostMapping(path = {"/api/v1/users/{id}/resetPin"})
     public ResponseEntity<OtpDto> resetPin(@PathVariable("id") Long id, @Valid @RequestBody ResetPin resetPin)
             throws Exception {
         userService.resetPin(id, resetPin);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile" })
+    @PostMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile"})
     public ResponseEntity<?> uploadPhotoProfile(@PathVariable("id") Long id,
-            @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
+                                                @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
         // String fileName = fileStorageService.storeFile(file);
         UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalService.savePhotoProfile(personalId,
                 file);
@@ -242,9 +246,9 @@ public class UserController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
+    @GetMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}"})
     public ResponseEntity<UserPersonalPhotoProfileDto> getPhotoProfileData(@PathVariable("id") Long id,
-            @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+                                                                           @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
         Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
@@ -254,9 +258,9 @@ public class UserController {
                 .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(fetchPhotoProfile.get()), HttpStatus.OK);
     }
 
-    @DeleteMapping(path = { "/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}" })
+    @DeleteMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}"})
     public ResponseEntity<?> deletePhotoProfile(@PathVariable("id") Long id,
-            @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+                                                @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
         Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
@@ -268,9 +272,9 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping(path = { "/api/v1/users/{id}/photoProfile/{fileName:.+}" })
+    @GetMapping(path = {"/api/v1/users/{id}/photoProfile/{fileName:.+}"})
     public ResponseEntity<Resource> getPhotoProfile(@PathVariable("id") Long id,
-            @PathVariable("fileName") String fileName, HttpServletRequest request) {
+                                                    @PathVariable("fileName") String fileName, HttpServletRequest request) {
         Resource resource = userPersonalService.getPhotoProfile(fileName);
 
         String contentType = null;
@@ -287,4 +291,37 @@ public class UserController {
                 // resource.getFilename() + "\"")
                 .body(resource);
     }
+
+    @Transactional
+    @PostMapping(path = {"/api/v1/users/{userId}/referral"})
+    public ResponseEntity<HttpStatus> joinReferral(@RequestBody JoinReferralDto joinReferralDto,
+                                                   @RequestHeader("user-id") Long userId,
+                                                   @PathVariable("userId") Long id) {
+        if (userId.longValue() != id.longValue()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        User user = userRepository.getById(userId);
+        UserDto userDto = userMapper.userToUserDto(user);
+        userDto.setReferral(joinReferralDto.getReferral());
+        userDto = userService.fetchReferral(userDto);
+        user.setParent(userDto.getParent());
+        user.setOfficialId(userDto.getOfficialId());
+        user.setUserGroup(UserGroupEnum.NETIZEN);
+        User updatedUser = userRepository.save(user);
+        log.info("Parent -> {}", updatedUser.getParent());
+        if (updatedUser.getParent() != null) {
+            // setup point
+            pointService.createPoint(userId);
+            // setup holiclub
+            holiclubService.createUserClub(UserClubDto.builder()
+                    .userId(userId)
+                    .userGroup(UserGroupEnum.NETIZEN).build());
+            // create referral
+            userReferralService.createRandomReferral(userId);
+
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+
 }

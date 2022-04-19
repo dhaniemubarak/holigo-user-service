@@ -34,4 +34,6 @@ public interface UserService {
 
     void resetOneTimePassword(User user);
 
+    UserDto fetchReferral(UserDto userDto);
+
 }

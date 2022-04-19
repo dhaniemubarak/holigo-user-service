@@ -1,7 +1,6 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,11 +37,8 @@ public class UserReferralController {
     @GetMapping("/api/v1/userReferral")
     public ResponseEntity<UserReferralDto> findReferral(@RequestParam("referral") String referral) {
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findByReferral(referral);
-        if (fetchUserReferral.isPresent()) {
-            return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(fetchUserReferral.get()),
-                    HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return fetchUserReferral.map(userReferral -> new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(userReferral),
+                HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/api/v1/userReferral")
@@ -66,7 +62,7 @@ public class UserReferralController {
 
     @GetMapping("/api/v1/users/{userId}/userReferral")
     public ResponseEntity<UserReferralDto> getReferralFromUser(@PathVariable("userId") Long id,
-            @RequestHeader("user-id") Long userId) {
+                                                               @RequestHeader("user-id") Long userId) {
         UserReferral userReferral;
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findByUserId(id);
         if (fetchUserReferral.isPresent()) {
@@ -81,9 +77,9 @@ public class UserReferralController {
                 HttpStatus.OK);
     }
 
-    @GetMapping({ "/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}" })
+    @GetMapping({"/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}"})
     public ResponseEntity<UserReferralDto> getReferral(@PathVariable("userReferralId") Long id,
-            @RequestHeader("user-id") Long userId) {
+                                                       @RequestHeader("user-id") Long userId) {
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findById(id);
         if (fetchUserReferral.isPresent()) {
             UserReferral userReferral = fetchUserReferral.get();
@@ -97,9 +93,9 @@ public class UserReferralController {
     }
 
     @Transactional
-    @PutMapping({ "/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}" })
+    @PutMapping({"/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}"})
     public ResponseEntity<UserReferralDto> updateReferral(@RequestBody UserReferralDto userReferralDto,
-            @PathVariable("userReferralId") Long id, @RequestHeader("user-id") Long userId) {
+                                                          @PathVariable("userReferralId") Long id, @RequestHeader("user-id") Long userId) {
 
         Optional<UserReferral> fetchUserReferralIsExists = userReferralRepository
                 .findByReferral(userReferralDto.getReferral());
