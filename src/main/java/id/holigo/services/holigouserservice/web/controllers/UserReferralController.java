@@ -1,6 +1,7 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -71,7 +72,7 @@ public class UserReferralController {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
         } else {
-            userReferral = userReferralService.createRandomReferral(userId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(userReferral),
                 HttpStatus.OK);
