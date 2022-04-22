@@ -268,13 +268,13 @@ public class UserServiceImpl implements UserService {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
         if (userDto.getReferral() != null) {
             UserReferral userReferral = null;
-            User parent = null;
+            UserDto parent = null;
             Long officialId = null;
             userReferral = userReferralRepository.findByReferral(userDto.getReferral())
                     .orElseThrow();
 
             userDto.setUserGroup(UserGroupEnum.NETIZEN);
-            parent = userReferral.getUser();
+            parent = userMapper.userToUserDto(userReferral.getUser());
             if (parent.getOfficialId() != null) {
                 officialId = parent.getOfficialId();
             }

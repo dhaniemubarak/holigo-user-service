@@ -1,37 +1,30 @@
-package id.holigo.services.common.model;
+package id.holigo.services.holigouserservice.web.model;
 
-import java.io.Serializable;
-import java.util.List;
+import id.holigo.services.common.model.AccountStatusEnum;
+import id.holigo.services.common.model.EmailStatusEnum;
+import id.holigo.services.common.model.UserDeviceDto;
+import id.holigo.services.common.model.UserGroupEnum;
+import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
+import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.List;
 
-import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
-import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-// import id.holigo.services.holigouserservice.validators.UniqueEmail;
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto implements Serializable {
+public class UserDtoForUser implements Serializable {
 
     static final long serialVersionUID = -5815566940065181210L;
     @Null
     private Long id;
-
-    @Null
-    private Long officialId;
-
-    @Null
-    private UserDto parent;
 
     @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100)

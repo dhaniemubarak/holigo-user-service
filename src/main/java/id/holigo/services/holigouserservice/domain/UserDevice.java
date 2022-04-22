@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -35,6 +36,7 @@ public class UserDevice {
     @Version
     private Long version;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 

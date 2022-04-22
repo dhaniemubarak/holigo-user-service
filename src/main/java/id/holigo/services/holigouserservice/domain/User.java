@@ -100,10 +100,12 @@ public class User {
     @JoinTable(name = "user_authority", joinColumns = {
             @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
                     @JoinColumn(name = "authority_id", referencedColumnName = "id") })
+    @JsonBackReference
     private Set<Authority> authorities;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
     private List<UserDevice> userDevices = new ArrayList<>();
 
     @OneToOne(fetch = LAZY)

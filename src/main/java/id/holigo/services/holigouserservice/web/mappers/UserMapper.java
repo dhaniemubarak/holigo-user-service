@@ -1,5 +1,6 @@
 package id.holigo.services.holigouserservice.web.mappers;
 
+import id.holigo.services.holigouserservice.web.model.UserDtoForUser;
 import org.mapstruct.Mapper;
 
 import id.holigo.services.common.model.UserDto;
@@ -12,4 +13,6 @@ public interface UserMapper {
     UserDto userToUserDto(User user);
 
     User userDtoToUser(UserDto userDto);
+
+    UserDtoForUser userToUserDtoForUser(User user);
 }

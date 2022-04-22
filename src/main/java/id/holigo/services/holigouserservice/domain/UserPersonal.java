@@ -3,12 +3,7 @@ package id.holigo.services.holigouserservice.domain;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -47,7 +42,7 @@ public class UserPersonal {
 
     private String city;
 
-    @OneToOne(mappedBy = "userPersonal")
+    @OneToOne(mappedBy = "userPersonal", fetch = FetchType.LAZY)
     private User user;
 
     @CreationTimestamp

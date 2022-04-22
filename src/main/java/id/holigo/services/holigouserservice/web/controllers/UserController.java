@@ -153,8 +153,8 @@ public class UserController {
     }
 
     @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}"})
-    public ResponseEntity<UserDto> getUser(@NotNull @PathVariable("id") Long id) {
-        return new ResponseEntity<UserDto>(userService.findById(id), HttpStatus.OK);
+    public ResponseEntity<UserDtoForUser> getUser(@NotNull @PathVariable("id") Long id) {
+        return new ResponseEntity<>(userMapper.userToUserDtoForUser(userRepository.getById(id)), HttpStatus.OK);
     }
 
     @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}/userDevices"})
@@ -304,7 +304,8 @@ public class UserController {
         UserDto userDto = userMapper.userToUserDto(user);
         userDto.setReferral(joinReferralDto.getReferral());
         userDto = userService.fetchReferral(userDto);
-        user.setParent(userDto.getParent());
+        User parent = userMapper.userDtoToUser(userDto);
+        user.setParent(parent.getParent());
         user.setOfficialId(userDto.getOfficialId());
         user.setUserGroup(UserGroupEnum.NETIZEN);
         User updatedUser = userRepository.save(user);
