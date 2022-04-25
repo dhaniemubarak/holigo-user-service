@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserParentForUser implements Serializable {
+public class UserParentDtoForUser implements Serializable {
 
     static final long serialVersionUID = -65181210L;
     @Null
@@ -20,5 +20,5 @@ public class UserParentForUser implements Serializable {
 
     private String name;
 
-    private String email;
+    private String referral;
 }

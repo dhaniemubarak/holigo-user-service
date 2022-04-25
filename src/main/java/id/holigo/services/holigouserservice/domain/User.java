@@ -138,4 +138,7 @@ public class User {
     private Boolean isOfficialAccount;
     // @Convert(converter = UserGroupEnumConverter.class)
 
+    @OneToOne(mappedBy = "user")
+    private UserReferral userReferral;
+
 }

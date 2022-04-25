@@ -5,6 +5,8 @@ import org.mapstruct.Mapper;
 
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,5 +16,6 @@ public interface UserMapper {
 
     User userDtoToUser(UserDto userDto);
 
+    @Mapping(target = "parent.referral", source = "parent.userReferral.referral")
     UserDtoForUser userToUserDtoForUser(User user);
 }

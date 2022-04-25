@@ -34,6 +34,8 @@ public class UserDtoForUser implements Serializable {
     @UniquePhoneNumber
     private String phoneNumber;
 
+    UserParentDtoForUser parent;
+
     @NotBlank(message = "Email is required")
     @Email
     @UniqueEmail
@@ -46,10 +48,6 @@ public class UserDtoForUser implements Serializable {
     private String mobileToken;
 
     private String type;
-
-    private Long registerId;
-
-    private String referral;
 
     private UserGroupEnum userGroup;
 
