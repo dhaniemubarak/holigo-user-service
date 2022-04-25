@@ -98,8 +98,8 @@ public class User {
     @Singular
     @ManyToMany(fetch = EAGER)
     @JoinTable(name = "user_authority", joinColumns = {
-            @JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
-                    @JoinColumn(name = "authority_id", referencedColumnName = "id") })
+            @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+            @JoinColumn(name = "authority_id", referencedColumnName = "id")})
     @JsonBackReference
     private Set<Authority> authorities;
 
@@ -133,6 +133,9 @@ public class User {
 
     @Transient
     private String referral;
+
+    @Column(columnDefinition = "bit(1) default 0")
+    private Boolean isOfficialAccount;
     // @Convert(converter = UserGroupEnumConverter.class)
 
 }

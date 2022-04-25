@@ -18,5 +18,13 @@ public class UserReferralDto implements Serializable {
 
     private String referral;
 
+    private String name;
+
+    private String photoProfileUrl;
+
+    private Boolean isOfficialAccount;
+
+    private String note;
+
     private ReferralStatusEnum status;
 }
