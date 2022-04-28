@@ -1,6 +1,5 @@
 package id.holigo.services.common.model;
 
-import id.holigo.services.holigouserservice.domain.DeviceTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,5 +1,6 @@
 package id.holigo.services.holigouserservice.web.mappers;
 
+import id.holigo.services.common.model.UserParentDto;
 import id.holigo.services.holigouserservice.web.model.UserDtoForUser;
 import org.mapstruct.Mapper;
 
@@ -18,4 +19,6 @@ public interface UserMapper {
 
     @Mapping(target = "parent.referral", source = "parent.userReferral.referral")
     UserDtoForUser userToUserDtoForUser(User user);
+
+    UserParentDto userToUserParentDto(User user);
 }
