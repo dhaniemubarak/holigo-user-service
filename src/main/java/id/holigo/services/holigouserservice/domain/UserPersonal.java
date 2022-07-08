@@ -26,16 +26,6 @@ public class UserPersonal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 100, columnDefinition = "varchar(100)")
-    private String name;
-
-    @Column(length = 20, columnDefinition = "varchar(20)")
-    private String phoneNumber;
-
-    private String email;
-
-    private EmailStatusEnum emailStatus;
-
     private GenderEnum gender;
 
     private Date birthDate;
@@ -54,4 +44,20 @@ public class UserPersonal {
 
     @OneToOne
     private UserPersonalPhotoProfile photoProfile;
+
+    public String getName() {
+        return user.getName();
+    }
+
+    public String getPhoneNumber() {
+        return user.getPhoneNumber();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public EmailStatusEnum getEmailStatus() {
+        return user.getEmailStatus();
+    }
 }

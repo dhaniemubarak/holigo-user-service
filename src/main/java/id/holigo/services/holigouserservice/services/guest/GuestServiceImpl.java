@@ -55,21 +55,26 @@ public class GuestServiceImpl implements GuestService {
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         user.setUserGroup(UserGroupEnum.MEMBER);
         user.addUserDevice(userDevice);
+        user.setIsOfficialAccount(false);
 
-        if (fetchAuth.isPresent()) {
-            Authority auth = fetchAuth.get();
-            Set<Authority> roles = new HashSet<>();
-            roles.add(auth);
-            user.setAuthorities(roles);
-        }
+        signAuth(fetchAuth, user, userRepository);
         User userSaved = userRepository.save(user);
-
         if (userSaved.getId() != null) {
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
             return userSaved;
         }
         return null;
+    }
+
+    public static void signAuth(Optional<Authority> fetchAuth, User user, UserRepository userRepository) {
+        if (fetchAuth.isPresent()) {
+            Authority auth = fetchAuth.get();
+            Set<Authority> roles = new HashSet<>();
+            roles.add(auth);
+            user.setAuthorities(roles);
+        }
+
     }
 
     public void updateGuest(User user) {

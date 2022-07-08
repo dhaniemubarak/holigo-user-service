@@ -1,14 +1,13 @@
 package id.holigo.services.holigouserservice.services;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.services.guest.GuestServiceImpl;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -85,10 +84,6 @@ public class UserServiceImpl implements UserService {
     public User save(UserDto userDto) throws Exception {
         UserDevice userDevice = userDeviceMapper.userDeviceDtoToUserDevice(userDto.getUserDevices().get(0));
         UserPersonal userPersonal = new UserPersonal();
-        userPersonal.setName(userDto.getName());
-        userPersonal.setEmail(userDto.getEmail());
-        userPersonal.setPhoneNumber(userDto.getPhoneNumber());
-        userPersonal.setEmailStatus(INIT_EMAIL_STATUS);
         UserPersonal savedUserPersonal = userPersonalService.createUserPersona(userPersonal);
         if (savedUserPersonal.getId() == null) {
             throw new Exception("Failed save personal data");
@@ -98,15 +93,11 @@ public class UserServiceImpl implements UserService {
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         user.setEmailStatus(INIT_EMAIL_STATUS);
+        user.setVerificationCode(RandomStringUtils.randomAlphabetic(64));
         user.setUserPersonal(savedUserPersonal);
 
         Optional<Authority> fetchAuth = authorityRepository.findById(2);
-        if (fetchAuth.isPresent()) {
-            Authority auth = fetchAuth.get();
-            Set<Authority> roles = new HashSet<>();
-            roles.add(auth);
-            user.setAuthorities(roles);
-        }
+        GuestServiceImpl.signAuth(fetchAuth, user, userRepository);
         User userSaved = userRepository.save(user);
 
         if (userSaved.getId() != null) {

@@ -73,6 +73,9 @@ public class User {
     @Convert(converter = UserGroupEnumConverter.class)
     private UserGroupEnum userGroup;
 
+    @Column(length = 64)
+    private String verificationCode;
+
     @Nullable
     private Timestamp emailVerifiedAt;
 
@@ -124,8 +127,7 @@ public class User {
     @Builder.Default
     private Boolean credentialsNonExpired = true;
 
-    @Builder.Default
-    private Boolean enabled = true;
+    private Boolean enabled;
 
     public void setPin(String value) {
         this.pin = new BCryptPasswordEncoder().encode(value);
@@ -136,9 +138,12 @@ public class User {
 
     @Column(columnDefinition = "bit(1) default 0")
     private Boolean isOfficialAccount;
-    // @Convert(converter = UserGroupEnumConverter.class)
 
     @OneToOne(mappedBy = "user")
     private UserReferral userReferral;
+
+    public Boolean isEnabled() {
+        return this.getEnabled();
+    }
 
 }
