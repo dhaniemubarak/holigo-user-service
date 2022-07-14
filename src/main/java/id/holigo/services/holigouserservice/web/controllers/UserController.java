@@ -157,6 +157,11 @@ public class UserController {
         return new ResponseEntity<>(userMapper.userToUserDtoForUser(userRepository.getById(id)), HttpStatus.OK);
     }
 
+    @GetMapping(produces = "application/json", path = {"/api/v1/completeUsers/{id}"})
+    public ResponseEntity<UserDto> getCompleteUser(@NotNull @PathVariable("id") Long id) {
+        return new ResponseEntity<>(userMapper.userToUserDto(userRepository.getById(id)), HttpStatus.OK);
+    }
+
     @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}/userDevices"})
     public ResponseEntity<UserDevicePaginate> getUserDevices(@NotNull @PathVariable("id") Long id,
                                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,

@@ -2,7 +2,7 @@ package id.holigo.services.holigouserservice.web.model;
 
 import java.sql.Date;
 
-import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
+import id.holigo.services.common.model.EmailStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

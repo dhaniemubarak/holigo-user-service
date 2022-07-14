@@ -102,12 +102,10 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         UserPersonal userPersonal = fetchUserPersonal.get();
         UserPersonal updateUserPersonal = userPersonalMapper.userPersonalDtoToUserPersonal(userPersonalDto);
         updateUserPersonal.setId(userPersonal.getId());
-        updateUserPersonal.setPhoneNumber(userPersonal.getPhoneNumber());
         User user = userPersonal.getUser();
         user.setEmail(updateUserPersonal.getEmail());
         user.setName(updateUserPersonal.getName());
         if (userPersonal.getEmail() != updateUserPersonal.getEmail()) {
-            updateUserPersonal.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
             user.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
         }
         userRepository.save(user);

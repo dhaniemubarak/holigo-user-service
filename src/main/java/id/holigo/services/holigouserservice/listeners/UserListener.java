@@ -28,13 +28,10 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class UserListener {
 
-    @Autowired
     private final JmsTemplate jmsTemplate;
 
-    @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
     private final UserMapper userMapper;
 
     @Transactional

@@ -8,22 +8,11 @@ import java.util.Set;
 import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import id.holigo.services.common.model.EmailStatusEnum;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.lang.Nullable;
@@ -63,9 +52,9 @@ public class User {
     @Column(length = 20, columnDefinition = "varchar(20)")
     private String phoneNumber;
 
-    @Nullable
     private String email;
 
+    @Enumerated(EnumType.STRING)
     private EmailStatusEnum emailStatus;
 
     private AccountStatusEnum accountStatus;

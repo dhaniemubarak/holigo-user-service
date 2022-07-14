@@ -46,6 +46,8 @@ public class UserDto implements Serializable {
     @UniqueEmail
     private String email;
 
+    private String verificationCode;
+
     private EmailStatusEnum emailStatus;
 
     private AccountStatusEnum accountStatus;

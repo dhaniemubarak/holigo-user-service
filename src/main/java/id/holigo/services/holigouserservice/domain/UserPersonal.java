@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 
 import javax.persistence.*;
 
+import id.holigo.services.common.model.EmailStatusEnum;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

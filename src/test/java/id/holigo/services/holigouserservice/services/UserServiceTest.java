@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import id.holigo.services.common.model.UserDeviceDto;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.common.model.DeviceTypeEnum;
-import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;

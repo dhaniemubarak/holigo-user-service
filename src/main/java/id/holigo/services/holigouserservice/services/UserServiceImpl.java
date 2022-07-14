@@ -17,7 +17,6 @@ import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
 import id.holigo.services.holigouserservice.domain.Authority;
-import id.holigo.services.holigouserservice.domain.EmailStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
