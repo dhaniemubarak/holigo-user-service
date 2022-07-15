@@ -1,5 +1,6 @@
 package id.holigo.services.holigouserservice.services;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,22 +28,16 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class UserPersonalServiceImpl implements UserPersonalService {
 
-    @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
     private final UserPersonalMapper userPersonalMapper;
 
-    @Autowired
     private final UserPersonalPhotoProfileMapper userPersonalPhotoProfileMapper;
 
-    @Autowired
     private final UserPersonalRepository userPersonalRepository;
 
-    @Autowired
     private final FileStorageService fileStorageService;
 
-    @Autowired
     private final UserPersonalPhotoProfileRepository userPersonalPhotoProfileRepository;
 
     @Override
@@ -105,7 +100,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         User user = userPersonal.getUser();
         user.setEmail(updateUserPersonal.getEmail());
         user.setName(updateUserPersonal.getName());
-        if (userPersonal.getEmail() != updateUserPersonal.getEmail()) {
+        if (!Objects.equals(userPersonal.getEmail(), updateUserPersonal.getEmail())) {
             user.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
         }
         userRepository.save(user);
