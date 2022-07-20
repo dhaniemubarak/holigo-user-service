@@ -3,7 +3,6 @@ package id.holigo.services.holigouserservice.services;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,17 +94,18 @@ public class UserPersonalServiceImpl implements UserPersonalService {
             throw new NotFoundException("Personal data not found");
         }
         UserPersonal userPersonal = fetchUserPersonal.get();
-        UserPersonal updateUserPersonal = userPersonalMapper.userPersonalDtoToUserPersonal(userPersonalDto);
-        updateUserPersonal.setId(userPersonal.getId());
         User user = userPersonal.getUser();
-        user.setEmail(updateUserPersonal.getEmail());
-        user.setName(updateUserPersonal.getName());
-        if (!Objects.equals(userPersonal.getEmail(), updateUserPersonal.getEmail())) {
+        String oldEmail = user.getEmail();
+        userPersonal.setGender(userPersonalDto.getGender());
+        userPersonal.setBirthDate(userPersonalDto.getBirthDate());
+        userPersonal.setCity(userPersonalDto.getCity());
+        user.setEmail(userPersonalDto.getEmail());
+        user.setName(userPersonalDto.getName());
+        if (!Objects.equals(oldEmail, userPersonal.getEmail())) {
             user.setEmailStatus(UserServiceImpl.INIT_EMAIL_STATUS);
         }
         userRepository.save(user);
-        UserPersonal userPersonalUpdated = userPersonalRepository.save(updateUserPersonal);
-        return userPersonalMapper.userPersonalToUserPersonalDto(userPersonalUpdated);
+        return userPersonalMapper.userPersonalToUserPersonalDto(userPersonalRepository.save(userPersonal));
     }
 
     @Transactional
@@ -118,7 +118,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         UserPersonal userPersonal = fetchUserPersonal.get();
         String fileName = fileStorageService.storeFile(file);
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/users/" + Long.toString(userPersonal.getUser().getId()) + "/photoProfile/")
+                .path("/api/v1/users/" + userPersonal.getUser().getId() + "/photoProfile/")
                 .path(fileName).toUriString();
 
         UserPersonalPhotoProfile userPersonalPhotoProfile = new UserPersonalPhotoProfile();
@@ -152,14 +152,14 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         if (fetchUserPersonalPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo profile not found");
         }
-        UserPersonalPhotoProfile userPersonalPhotoProfil = fetchUserPersonalPhotoProfile.get();
-        UserPersonal userPersonal = userPersonalPhotoProfil.getUserPersonal();
+        UserPersonalPhotoProfile userPersonalPhotoProfile = fetchUserPersonalPhotoProfile.get();
+        UserPersonal userPersonal = userPersonalPhotoProfile.getUserPersonal();
         userPersonal.setPhotoProfile(null);
         UserPersonal updatedUserPersonal = userPersonalRepository.save(userPersonal);
         if (updatedUserPersonal.getPhotoProfile() == null) {
-            isDeleted = fileStorageService.deleteFile(userPersonalPhotoProfil.getFileName());
+            isDeleted = fileStorageService.deleteFile(userPersonalPhotoProfile.getFileName());
             if (isDeleted) {
-                userPersonalPhotoProfileRepository.deleteById(userPersonalPhotoProfil.getId());
+                userPersonalPhotoProfileRepository.deleteById(userPersonalPhotoProfile.getId());
             }
         }
         return isDeleted;

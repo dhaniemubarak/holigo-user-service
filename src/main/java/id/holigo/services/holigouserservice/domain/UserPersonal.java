@@ -27,6 +27,18 @@ public class UserPersonal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Transient
+    private String name;
+
+    @Transient
+    private String phoneNumber;
+
+    @Transient
+    private String email;
+
+    @Transient
+    private EmailStatusEnum emailStatus;
+
     private GenderEnum gender;
 
     private Date birthDate;

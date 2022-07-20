@@ -3,6 +3,7 @@ package id.holigo.services.holigouserservice.web.model;
 import java.sql.Date;
 
 import id.holigo.services.common.model.EmailStatusEnum;
+import id.holigo.services.holigouserservice.domain.GenderEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
