@@ -47,8 +47,7 @@ public class UserReferralServiceImpl implements UserReferralService {
     }
 
     private String generateRandomReferral(User user) {
-        UserPersonal userPersonal = user.getUserPersonal();
-        String name = userPersonal.getName();
+        String name = user.getName();
         name = name.replaceAll("\\s+", "");
         if (name.length() > 4) {
             name = name.substring(0, 5);

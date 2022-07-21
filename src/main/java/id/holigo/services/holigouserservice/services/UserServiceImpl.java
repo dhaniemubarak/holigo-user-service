@@ -1,5 +1,7 @@
 package id.holigo.services.holigouserservice.services;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -9,6 +11,7 @@ import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
@@ -38,6 +41,14 @@ import javax.transaction.Transactional;
 public class UserServiceImpl implements UserService {
 
     public static final EmailStatusEnum INIT_EMAIL_STATUS = EmailStatusEnum.WAITING_CONFIRMATION;
+
+    @Value("${otp.provider.priority}")
+    public String otpProviderPriority;
+
+
+    @Value("${default.referral}")
+    public String defaultReferral;
+
 
     @Autowired
     private final UserRepository userRepository;
@@ -87,12 +98,23 @@ public class UserServiceImpl implements UserService {
         if (savedUserPersonal.getId() == null) {
             throw new Exception("Failed save personal data");
         }
+
+        if (userDto.getReferral() == null && !this.defaultReferral.isEmpty()) {
+            userDto.setReferral(this.defaultReferral);
+        }
         userDto = fetchReferral(userDto);
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
-        user.setEmailStatus(INIT_EMAIL_STATUS);
-        user.setVerificationCode(RandomStringUtils.randomAlphabetic(64));
+        if (this.otpProviderPriority.equals("EMAIL")) {
+            user.setEmailStatus(EmailStatusEnum.CONFIRMED);
+            user.setEmailVerifiedAt(Timestamp.valueOf(LocalDateTime.now()));
+            user.setEnabled(true);
+        } else {
+            user.setEmailStatus(INIT_EMAIL_STATUS);
+            user.setVerificationCode(RandomStringUtils.randomAlphabetic(64));
+        }
+
         user.setUserPersonal(savedUserPersonal);
 
         Optional<Authority> fetchAuth = authorityRepository.findById(2);
@@ -131,19 +153,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean isEmailAlreadyInUse(String email) {
-        if (userRepository.findAllByEmail(email).size() > 0) {
-            return true;
-        }
-        return false;
+        return userRepository.findAllByEmail(email).size() > 0;
     }
 
     @Override
     @Transactional
     public boolean isPhoneNumberAlreadyInUse(String phoneNumber) {
-        if (userRepository.findAllByPhoneNumber(phoneNumber).size() > 0) {
-            return true;
-        }
-        return false;
+        return userRepository.findAllByPhoneNumber(phoneNumber).size() > 0;
     }
 
     @Override
