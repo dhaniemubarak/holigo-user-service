@@ -1,10 +1,7 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -58,40 +55,30 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class UserController {
 
-    @Autowired
     private final UserService userService;
 
-    @Autowired
     private final OtpService otpService;
 
-    @Autowired
     private final UserPersonalService userPersonalService;
 
-    @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
     private final UserPersonalPhotoProfileRepository userPersonalPhotoProfileRepository;
 
-    @Autowired
     private final UserMapper userMapper;
 
-    @Autowired
+
     private final UserPersonalPhotoProfileMapper userPersonalPhotoProfileMapper;
 
-    @Autowired
     private final UserDeviceService userDeviceService;
 
-    @Autowired
+
     private final OauthService oauthService;
 
-    @Autowired
     private final PointService pointService;
 
-    @Autowired
     private final HoliclubService holiclubService;
 
-    @Autowired
     private final UserReferralService userReferralService;
 
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
@@ -327,6 +314,21 @@ public class UserController {
 
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping({"/api/v1/users/{id}"})
+    public ResponseEntity<HttpStatus> deleteUser(@RequestBody DeletedUserDto deletedUserDto,
+                                                 @RequestHeader("user-id") Long userId,
+                                                 @PathVariable("id") Long id) {
+        if (!Objects.equals(userId, id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Optional<User> fetchUser = userRepository.findById(userId);
+        if (fetchUser.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        userService.deleteUser(fetchUser.get(), deletedUserDto);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

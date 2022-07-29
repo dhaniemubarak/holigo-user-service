@@ -6,24 +6,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.domain.*;
+import id.holigo.services.holigouserservice.repositories.*;
 import id.holigo.services.holigouserservice.services.guest.GuestServiceImpl;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
+import id.holigo.services.holigouserservice.web.model.DeletedUserDto;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
-import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
-import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
-import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
-import id.holigo.services.holigouserservice.domain.Authority;
-import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserDevice;
-import id.holigo.services.holigouserservice.domain.UserPersonal;
-import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
@@ -33,6 +27,7 @@ import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
 import javax.transaction.Transactional;
 
@@ -50,38 +45,29 @@ public class UserServiceImpl implements UserService {
     public String defaultReferral;
 
 
-    @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
     private final AuthorityRepository authorityRepository;
 
-    @Autowired
     private final UserMapper userMapper;
 
-    @Autowired
     private final UserDeviceMapper userDeviceMapper;
 
-    @Autowired
     private final UserDeviceRepository userDeviceRepository;
 
-    @Autowired
     private final UserReferralRepository userReferralRepository;
 
-    @Autowired
-    final UserPersonalService userPersonalService;
+    private final UserPersonalService userPersonalService;
 
-    @Autowired
     private final OtpService otpService;
 
-    @Autowired
     private final UserReferralService userReferralService;
 
-    @Autowired
     private final HoliclubService holiclubService;
 
-    @Autowired
     private final PointService pointService;
+
+    private final DeletedUserRepository deletedUserRepository;
 
     @Override
     @Transactional
@@ -148,6 +134,50 @@ public class UserServiceImpl implements UserService {
             fetchReferral(userDto);
         }
         return userMapper.userToUserDto(userRepository.save(resultUser));
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(User user, DeletedUserDto deletedUserDto) {
+        boolean recursive = true;
+        int phoneNumberCounter = 1;
+        int emailCounter = 1;
+        String deletedPhoneNumber = user.getPhoneNumber();
+        String deletedEmail = user.getEmail();
+        while (recursive) {
+            deletedPhoneNumber = user.getPhoneNumber() + "-" + phoneNumberCounter;
+            Optional<User> fetchPhoneNumber = userRepository.findByPhoneNumber(deletedPhoneNumber);
+
+            if (fetchPhoneNumber.isEmpty()) {
+                recursive = false;
+            }
+            phoneNumberCounter++;
+        }
+        recursive = true;
+        while (recursive) {
+            deletedEmail = user.getEmail() + "-" + emailCounter;
+            Optional<User> fetchEmail = userRepository.findByEmail(deletedEmail);
+            if (fetchEmail.isEmpty()) {
+                recursive = false;
+            }
+            emailCounter++;
+        }
+        user.setPhoneNumber(deletedPhoneNumber);
+        user.setEmail(deletedEmail);
+        user.setAccountNonExpired(false);
+        user.setAccountNonLocked(false);
+        user.setCredentialsNonExpired(false);
+        user.setEnabled(false);
+        user.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+        user.setVerificationCode(null);
+        user.setPin(null);
+        user.setMobileToken(null);
+        user.setOneTimePassword(null);
+        user.setAccountStatus(AccountStatusEnum.DELETED);
+        userRepository.save(user);
+        deletedUserRepository.save(DeletedUser.builder()
+                .userId(user.getId()).reason(deletedUserDto.getReason()).build());
+
     }
 
     @Override
