@@ -84,6 +84,8 @@ public class User {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
+    private Timestamp deletedAt;
+
     @Column(nullable = true)
     private String mobileToken;
 
@@ -119,7 +121,11 @@ public class User {
     private Boolean enabled;
 
     public void setPin(String value) {
-        this.pin = new BCryptPasswordEncoder().encode(value);
+        if (value != null) {
+            this.pin = new BCryptPasswordEncoder().encode(value);
+        } else {
+            this.pin = null;
+        }
     }
 
     @Transient
