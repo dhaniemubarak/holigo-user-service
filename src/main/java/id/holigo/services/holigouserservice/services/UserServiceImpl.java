@@ -39,48 +39,21 @@ import javax.transaction.Transactional;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-
     public static final EmailStatusEnum INIT_EMAIL_STATUS = EmailStatusEnum.WAITING_CONFIRMATION;
-
     @Value("${otp.provider.priority}")
     public String otpProviderPriority;
-
-
     @Value("${default.referral}")
     public String defaultReferral;
-
-
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final AuthorityRepository authorityRepository;
-
-    @Autowired
     private final UserMapper userMapper;
-
-    @Autowired
     private final UserDeviceMapper userDeviceMapper;
-
-    @Autowired
     private final UserDeviceRepository userDeviceRepository;
-
-    @Autowired
     private final UserReferralRepository userReferralRepository;
-
-    @Autowired
-    final UserPersonalService userPersonalService;
-
-    @Autowired
+    private final UserPersonalService userPersonalService;
     private final OtpService otpService;
-
-    @Autowired
     private final UserReferralService userReferralService;
-
-    @Autowired
     private final HoliclubService holiclubService;
-
-    @Autowired
     private final PointService pointService;
 
     @Override
@@ -253,10 +226,7 @@ public class UserServiceImpl implements UserService {
         OtpDto otpDto = otpService.getOtpForResetPin(OtpDto.builder().phoneNumber(user.getPhoneNumber())
                 .oneTimePassword(resetPin.getOneTimePassword()).build());
 
-        boolean isOtpValid = false;
-        if (otpDto.getStatus() == OtpStatusEnum.CONFIRMED) {
-            isOtpValid = true;
-        }
+        boolean isOtpValid = otpDto.getStatus() == OtpStatusEnum.CONFIRMED;
         if (isOtpValid) {
             user.setPin(resetPin.getPin());
             try {
@@ -273,8 +243,8 @@ public class UserServiceImpl implements UserService {
     public UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
         if (userDto.getReferral() != null) {
-            UserReferral userReferral = null;
-            UserParentDto parent = null;
+            UserReferral userReferral;
+            UserParentDto parent;
             Long officialId = null;
             userReferral = userReferralRepository.findByReferral(userDto.getReferral())
                     .orElseThrow();
