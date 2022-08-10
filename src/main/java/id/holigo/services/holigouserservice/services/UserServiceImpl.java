@@ -13,7 +13,6 @@ import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
 import id.holigo.services.holigouserservice.web.model.DeletedUserDto;
 import org.apache.commons.lang.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,44 +26,27 @@ import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
 import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-
     public static final EmailStatusEnum INIT_EMAIL_STATUS = EmailStatusEnum.WAITING_CONFIRMATION;
-
     @Value("${otp.provider.priority}")
     public String otpProviderPriority;
-
-
     @Value("${default.referral}")
     public String defaultReferral;
-
-
     private final UserRepository userRepository;
-
     private final AuthorityRepository authorityRepository;
-
     private final UserMapper userMapper;
-
     private final UserDeviceMapper userDeviceMapper;
-
     private final UserDeviceRepository userDeviceRepository;
-
     private final UserReferralRepository userReferralRepository;
-
     private final UserPersonalService userPersonalService;
-
     private final OtpService otpService;
-
     private final UserReferralService userReferralService;
-
     private final HoliclubService holiclubService;
-
     private final PointService pointService;
 
     private final DeletedUserRepository deletedUserRepository;
@@ -136,6 +118,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(userRepository.save(resultUser));
     }
 
+
+    @Override
+    @Transactional
+    public boolean isEmailAlreadyInUse(String email) {
+        return userRepository.findAllByEmail(email).size() > 0;
+    }
+
     @Override
     @Transactional
     public void deleteUser(User user, DeletedUserDto deletedUserDto) {
@@ -180,11 +169,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    @Transactional
-    public boolean isEmailAlreadyInUse(String email) {
-        return userRepository.findAllByEmail(email).size() > 0;
-    }
 
     @Override
     @Transactional
@@ -283,10 +267,7 @@ public class UserServiceImpl implements UserService {
         OtpDto otpDto = otpService.getOtpForResetPin(OtpDto.builder().phoneNumber(user.getPhoneNumber())
                 .oneTimePassword(resetPin.getOneTimePassword()).build());
 
-        boolean isOtpValid = false;
-        if (otpDto.getStatus() == OtpStatusEnum.CONFIRMED) {
-            isOtpValid = true;
-        }
+        boolean isOtpValid = otpDto.getStatus() == OtpStatusEnum.CONFIRMED;
         if (isOtpValid) {
             user.setPin(resetPin.getPin());
             try {
@@ -303,8 +284,8 @@ public class UserServiceImpl implements UserService {
     public UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
         if (userDto.getReferral() != null) {
-            UserReferral userReferral = null;
-            UserParentDto parent = null;
+            UserReferral userReferral;
+            UserParentDto parent;
             Long officialId = null;
             userReferral = userReferralRepository.findByReferral(userDto.getReferral())
                     .orElseThrow();
