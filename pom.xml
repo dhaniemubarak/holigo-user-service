@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>id.holigo.services</groupId>
 	<artifactId>holigo-user-service</artifactId>
-	<version>1.8.1</version>
+	<version>1.8.2</version>
 	<name>holigo-user-service</name>
 	<description>Holigo user service</description>
 	<properties>
