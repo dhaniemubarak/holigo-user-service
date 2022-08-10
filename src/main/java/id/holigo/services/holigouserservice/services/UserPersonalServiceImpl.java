@@ -3,6 +3,7 @@ package id.holigo.services.holigouserservice.services;
 import java.util.Objects;
 import java.util.Optional;
 
+import id.holigo.services.holigouserservice.web.model.ImageKitDto;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,15 +117,12 @@ public class UserPersonalServiceImpl implements UserPersonalService {
             throw new NotFoundException("Personal data not found");
         }
         UserPersonal userPersonal = fetchUserPersonal.get();
-        String fileName = fileStorageService.storeFile(file);
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/users/" + userPersonal.getUser().getId() + "/photoProfile/")
-                .path(fileName).toUriString();
-
+        ImageKitDto imageKitDto = fileStorageService.storeFile(file, personalId);
         UserPersonalPhotoProfile userPersonalPhotoProfile = new UserPersonalPhotoProfile();
-        userPersonalPhotoProfile.setFileName(fileName);
-        userPersonalPhotoProfile.setFileDownloadUri(fileDownloadUri);
+        userPersonalPhotoProfile.setFileName(imageKitDto.getFileName());
+        userPersonalPhotoProfile.setFileDownloadUri(imageKitDto.getUrl());
         userPersonalPhotoProfile.setFileType(file.getContentType());
+        userPersonalPhotoProfile.setFileId(imageKitDto.getFileId());
         userPersonalPhotoProfile.setSize(file.getSize());
 
         UserPersonalPhotoProfile savedUserPersonalPhotoProfile = userPersonalPhotoProfileRepository
@@ -157,7 +155,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         userPersonal.setPhotoProfile(null);
         UserPersonal updatedUserPersonal = userPersonalRepository.save(userPersonal);
         if (updatedUserPersonal.getPhotoProfile() == null) {
-            isDeleted = fileStorageService.deleteFile(userPersonalPhotoProfile.getFileName());
+            isDeleted = fileStorageService.deleteFile(userPersonalPhotoProfile.getFileId());
             if (isDeleted) {
                 userPersonalPhotoProfileRepository.deleteById(userPersonalPhotoProfile.getId());
             }

@@ -229,7 +229,7 @@ public class UserController {
                 file);
 
         String locationUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/users/" + Long.toString(id) + "/userPersonal/" + personalId + "/photoProfile/"
+                .path("/api/v1/users/" + id + "/userPersonal/" + personalId + "/photoProfile/"
                         + userPersonalPhotoProfileDto.getId())
                 .toUriString();
         HttpHeaders headers = new HttpHeaders();
@@ -262,26 +262,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @GetMapping(path = {"/api/v1/users/{id}/photoProfile/{fileName:.+}"})
-    public ResponseEntity<Resource> getPhotoProfile(@PathVariable("id") Long id,
-                                                    @PathVariable("fileName") String fileName, HttpServletRequest request) {
-        Resource resource = userPersonalService.getPhotoProfile(fileName);
-
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException e) {
-            //
-        }
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                // .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                // resource.getFilename() + "\"")
-                .body(resource);
     }
 
     @Transactional
