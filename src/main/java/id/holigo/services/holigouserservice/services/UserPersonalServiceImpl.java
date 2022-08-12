@@ -116,7 +116,12 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         if (fetchUserPersonal.isEmpty()) {
             throw new NotFoundException("Personal data not found");
         }
+        UserPersonalPhotoProfile tempPhotoProfile = null;
         UserPersonal userPersonal = fetchUserPersonal.get();
+        if (userPersonal.getPhotoProfile()!=null){
+            tempPhotoProfile = userPersonal.getPhotoProfile();
+
+        }
         ImageKitDto imageKitDto = fileStorageService.storeFile(file, personalId);
         UserPersonalPhotoProfile userPersonalPhotoProfile = new UserPersonalPhotoProfile();
         userPersonalPhotoProfile.setFileName(imageKitDto.getFileName());
@@ -130,8 +135,16 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         if (savedUserPersonalPhotoProfile.getId() == null) {
             throw new Exception("Failed save photo profile");
         }
+
         userPersonal.setPhotoProfile(savedUserPersonalPhotoProfile);
         userPersonalRepository.save(userPersonal);
+
+        //delete previous image
+        if (savedUserPersonalPhotoProfile.getId()!=null){
+            assert tempPhotoProfile != null;
+            fileStorageService.deleteFile(tempPhotoProfile.getFileId());
+            userPersonalPhotoProfileRepository.delete(tempPhotoProfile);
+        }
         return userPersonalPhotoProfileMapper
                 .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(savedUserPersonalPhotoProfile);
     }
