@@ -140,8 +140,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         userPersonalRepository.save(userPersonal);
 
         //delete previous image
-        if (savedUserPersonalPhotoProfile.getId()!=null){
-            assert tempPhotoProfile != null;
+        if (savedUserPersonalPhotoProfile.getId()!=null && tempPhotoProfile!=null){
             fileStorageService.deleteFile(tempPhotoProfile.getFileId());
             userPersonalPhotoProfileRepository.delete(tempPhotoProfile);
         }
