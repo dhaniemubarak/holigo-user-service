@@ -110,6 +110,7 @@ public class UserController {
             if (userId != null) {
                 userDto.setId(userId);
             }
+            userDto.setIsOfficialAccount(false);
             User savedUser = userService.save(userDto);
             userService.createOneTimePassword(savedUser, "0921");
             Collection<String> authorities = new ArrayList<>();
