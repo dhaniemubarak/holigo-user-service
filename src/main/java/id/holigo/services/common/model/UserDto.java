@@ -11,13 +11,10 @@ import javax.validation.constraints.Size;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
 import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-// import id.holigo.services.holigouserservice.validators.UniqueEmail;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -61,6 +58,8 @@ public class UserDto implements Serializable {
     private String referral;
 
     private UserGroupEnum userGroup;
+
+    private Boolean isOfficialAccount;
 
     List<UserDeviceDto> userDevices;
 
