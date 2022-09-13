@@ -7,7 +7,9 @@ import java.util.Optional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import id.holigo.services.common.model.OtpDto;
+import id.holigo.services.common.model.OtpStatusEnum;
+import id.holigo.services.holigouserservice.services.otp.OtpService;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -27,15 +29,15 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class OauthUserListener {
 
-    @Autowired
     private final JmsTemplate jmsTemplate;
 
-    @Autowired
     private final UserRepository userRepository;
+
+    private final OtpService otpService;
 
     @JmsListener(destination = JmsConfig.OAUTH_USER_DATA_QUEUE)
     public void listen(@Payload UserAuthenticationDto userAuthenticationDto, @Headers MessageHeaders headers,
-            Message message) throws JmsException, JMSException {
+                       Message message) throws JmsException, JMSException {
         Optional<User> fetchUser = userRepository.findByPhoneNumber(userAuthenticationDto.getPhoneNumber());
         if (fetchUser.isPresent()) {
             User user = fetchUser.get();
@@ -64,6 +66,17 @@ public class OauthUserListener {
             User user = fetchUser.get();
             user.setOneTimePassword(userAuthenticationDto.getOneTimePassword());
             userRepository.save(user);
+        }
+    }
+
+    @JmsListener(destination = JmsConfig.OAUTH_RESET_OTP_QUEUE)
+    public void listenForResetOtp(@Payload UserAuthenticationDto userAuthenticationDto) {
+        Optional<User> fetchUser = userRepository.findByPhoneNumber(userAuthenticationDto.getPhoneNumber());
+        if (fetchUser.isPresent()) {
+            User user = fetchUser.get();
+            user.setOneTimePassword(null);
+            userRepository.save(user);
+            otpService.updateOtpStatus(OtpDto.builder().phoneNumber(userAuthenticationDto.getPhoneNumber()).status(OtpStatusEnum.CONFIRMED).build());
         }
     }
 }

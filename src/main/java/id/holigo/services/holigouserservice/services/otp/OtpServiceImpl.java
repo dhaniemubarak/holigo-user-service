@@ -28,31 +28,22 @@ public class OtpServiceImpl implements OtpService {
     private final ObjectMapper objectMapper;
 
     public boolean isRegisterIdValid(Long registerId, String phoneNumber)
-            throws JsonMappingException, JsonProcessingException, JmsException, JMSException {
+            throws JsonProcessingException, JmsException, JMSException {
         boolean isValid = false;
         OtpDto otpDto = OtpDto.builder().id(registerId).phoneNumber(phoneNumber).build();
-
-        log.debug("checkForOtpIsValid is running .....");
-        log.info("INFO : checkForOtpIsValid is running .....");
-        Message received = jmsTemplate.sendAndReceive(JmsConfig.OTP_REGISTER_VALIDATION_QUEUE, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                Message message = null;
-                try {
-                    message = session.createTextMessage(objectMapper.writeValueAsString(otpDto));
-                } catch (JsonProcessingException e) {
-                    throw new JMSException(e.getMessage());
-                }
-                message.setStringProperty("_type", "id.holigo.services.common.model.OtpDto");
-
-                return message;
+        Message received = jmsTemplate.sendAndReceive(JmsConfig.OTP_REGISTER_VALIDATION_QUEUE, session -> {
+            Message message = null;
+            try {
+                message = session.createTextMessage(objectMapper.writeValueAsString(otpDto));
+            } catch (JsonProcessingException e) {
+                throw new JMSException(e.getMessage());
             }
-        });
-        log.info("received body -> {}", received.getBody(String.class));
+            message.setStringProperty("_type", "id.holigo.services.common.model.OtpDto");
 
+            return message;
+        });
+        assert received != null;
         OtpDto result = objectMapper.readValue(received.getBody(String.class), OtpDto.class);
-        log.info("result -> {}", result);
-        log.info("status -> ", result.getStatus());
 
         if (result.getStatus() == OtpStatusEnum.CONFIRMED) {
             isValid = true;
@@ -62,22 +53,24 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     public OtpDto getOtpForResetPin(OtpDto otpDto)
-            throws JsonMappingException, JsonProcessingException, JMSException {
-        Message received = jmsTemplate.sendAndReceive(JmsConfig.OTP_RESET_PIN_VALIDATION_QUEUE, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                Message message = null;
-                try {
-                    message = session.createTextMessage(objectMapper.writeValueAsString(otpDto));
-                } catch (JsonProcessingException e) {
-                    throw new JMSException(e.getMessage());
-                }
-                message.setStringProperty("_type", "id.holigo.services.common.model.OtpDto");
-
-                return message;
+            throws JsonProcessingException, JMSException {
+        Message received = jmsTemplate.sendAndReceive(JmsConfig.OTP_RESET_PIN_VALIDATION_QUEUE, session -> {
+            Message message = null;
+            try {
+                message = session.createTextMessage(objectMapper.writeValueAsString(otpDto));
+            } catch (JsonProcessingException e) {
+                throw new JMSException(e.getMessage());
             }
+            message.setStringProperty("_type", "id.holigo.services.common.model.OtpDto");
+
+            return message;
         });
-        OtpDto result = objectMapper.readValue(received.getBody(String.class), OtpDto.class);
-        return result;
+        assert received != null;
+        return objectMapper.readValue(received.getBody(String.class), OtpDto.class);
+    }
+
+    @Override
+    public void updateOtpStatus(OtpDto otpDto) {
+        jmsTemplate.convertAndSend(JmsConfig.OTP_LOGIN_VALIDATION_QUEUE, otpDto);
     }
 }

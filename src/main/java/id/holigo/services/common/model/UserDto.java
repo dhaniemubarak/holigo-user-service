@@ -8,7 +8,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
-import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.web.validators.UniqueEmail;
 import id.holigo.services.holigouserservice.web.validators.UniquePhoneNumber;
 import lombok.*;
@@ -30,11 +29,9 @@ public class UserDto implements Serializable {
     @Null
     private UserParentDto parent;
 
-    @NotBlank(message = "Name is required")
     @Size(min = 2, max = 100)
     private String name;
 
-    @NotBlank(message = "Phone number is required")
     @UniquePhoneNumber
     private String phoneNumber;
 
@@ -58,6 +55,8 @@ public class UserDto implements Serializable {
     private String referral;
 
     private UserGroupEnum userGroup;
+    
+    private Boolean isOfficialAccount;
 
     private Boolean isOfficialAccount;
 

@@ -36,6 +36,8 @@ public class UserPersonalPhotoProfile {
 
     private String fileType;
 
+    private String fileId;
+
     private Long size;
 
     @CreationTimestamp

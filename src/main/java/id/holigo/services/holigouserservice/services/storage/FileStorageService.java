@@ -1,14 +1,15 @@
 package id.holigo.services.holigouserservice.services.storage;
 
+import id.holigo.services.holigouserservice.web.model.ImageKitDto;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileStorageService {
 
-    String storeFile(MultipartFile file);
+    ImageKitDto storeFile(MultipartFile file, Long personalId);
 
     Resource loadFileAsResource(String fileName);
 
-    boolean deleteFile(String fileName);
+    boolean deleteFile(String fileId);
 
 }
