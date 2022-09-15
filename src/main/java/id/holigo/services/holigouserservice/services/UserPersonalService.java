@@ -1,6 +1,5 @@
 package id.holigo.services.holigouserservice.services;
 
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import id.holigo.services.holigouserservice.domain.UserPersonal;
@@ -18,7 +17,7 @@ public interface UserPersonalService {
 
     UserPersonalPhotoProfileDto savePhotoProfile(Long personalId, MultipartFile file) throws Exception;
 
-    Resource getPhotoProfile(String fileName);
+//    Resource getPhotoProfile(String fileName);
 
     boolean deletePhotoProfile(Long photoProfileId);
 }

@@ -4,11 +4,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 import id.holigo.services.holigouserservice.web.model.ImageKitDto;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserPersonal;
@@ -148,10 +146,10 @@ public class UserPersonalServiceImpl implements UserPersonalService {
                 .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(savedUserPersonalPhotoProfile);
     }
 
-    @Override
-    public Resource getPhotoProfile(String fileName) {
-        return fileStorageService.loadFileAsResource(fileName);
-    }
+//    @Override
+//    public Resource getPhotoProfile(String fileName) {
+//        return fileStorageService.loadFileAsResource(fileName);
+//    }
 
     @Transactional
     @Override

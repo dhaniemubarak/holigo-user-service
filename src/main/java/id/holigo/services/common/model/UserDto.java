@@ -58,8 +58,6 @@ public class UserDto implements Serializable {
     
     private Boolean isOfficialAccount;
 
-    private Boolean isOfficialAccount;
-
     List<UserDeviceDto> userDevices;
 
 }

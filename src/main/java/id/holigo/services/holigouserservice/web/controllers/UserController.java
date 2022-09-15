@@ -1,9 +1,6 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -11,13 +8,11 @@ import id.holigo.services.common.model.*;
 import id.holigo.services.holigouserservice.services.*;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
+import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import id.holigo.services.holigouserservice.web.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -84,29 +79,12 @@ public class UserController {
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
     private static final Integer DEFAULT_PAGE_SIZE = 25;
 
-    public List<UserDto> index(@RequestParam(value = "phoneNumber", required = true) String phoneNumber) {
-        log.info("Calling index ....");
-        List<UserDto> users = new ArrayList<>();
-        if (!phoneNumber.isEmpty()) {
-            log.info("Not empty");
-            System.out.println("Not Empty");
-            return userRepository.findAllByPhoneNumber(phoneNumber).stream().map(userMapper::userToUserDto)
-                    .collect(Collectors.toList());
-        }
-        return users;
-    }
-
-    @GetMapping(path = {"/api/v1/users"})
-    public ResponseEntity<UserPaginate> getAllUser() {
-        return new ResponseEntity<>(userService.getAllUser(), HttpStatus.OK);
-    }
-
     @PostMapping(produces = "application/json", path = {"/api/v1/users"})
     public ResponseEntity<OauthAccessTokenDto> saveUser(@NotNull @Valid @RequestBody UserDto userDto,
                                                         @RequestHeader(value = "user-id") Long userId) throws Exception {
         boolean isRegisterValid = otpService.isRegisterIdValid(userDto.getRegisterId(), userDto.getPhoneNumber());
         if (isRegisterValid) {
-            OauthAccessTokenDto oauthAccessTokenDto = null;
+            OauthAccessTokenDto oauthAccessTokenDto;
             if (userId != null) {
                 userDto.setId(userId);
             }
@@ -114,9 +92,7 @@ public class UserController {
             User savedUser = userService.save(userDto);
             userService.createOneTimePassword(savedUser, "0921");
             Collection<String> authorities = new ArrayList<>();
-            savedUser.getAuthorities().forEach(authority -> {
-                authorities.add(authority.getRole());
-            });
+            savedUser.getAuthorities().forEach(authority -> authorities.add(authority.getRole()));
             UserAuthenticationDto userAuthenticationDto = UserAuthenticationDto.builder().id(savedUser.getId())
                     .phoneNumber(savedUser.getPhoneNumber()).accountStatus(savedUser.getAccountStatus())
                     .type(savedUser.getType()).authorities(authorities).oneTimePassword("0921")
@@ -136,13 +112,25 @@ public class UserController {
 
     @PutMapping(path = {"/api/v1/users/{id}"})
     public ResponseEntity<UserDto> updateUser(@NotNull @PathVariable("id") Long id,
-                                              @Valid @RequestBody UserDto userDto) {
-        return new ResponseEntity<UserDto>(userService.update(id, userDto), HttpStatus.OK);
+                                              @Valid @RequestBody UserDto userDto,
+                                              @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
+        return new ResponseEntity<>(userService.update(id, userDto), HttpStatus.OK);
     }
 
     @GetMapping(produces = "application/json", path = {"/api/v1/users/{id}"})
-    public ResponseEntity<UserDtoForUser> getUser(@NotNull @PathVariable("id") Long id) {
-        return new ResponseEntity<>(userMapper.userToUserDtoForUser(userRepository.getById(id)), HttpStatus.OK);
+    public ResponseEntity<UserDtoForUser> getUser(@NotNull @PathVariable("id") Long id,
+                                                  @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
+        Optional<User> fetchUser = userRepository.findById(id);
+        if (fetchUser.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return new ResponseEntity<>(userMapper.userToUserDtoForUser(fetchUser.get()), HttpStatus.OK);
     }
 
     @GetMapping(produces = "application/json", path = {"/api/v1/completeUsers/{id}"})
@@ -183,13 +171,22 @@ public class UserController {
 
     @PutMapping(produces = "application/json", path = {"/api/v1/users/{id}/userPersonal/{personalId}"})
     public ResponseEntity<UserPersonalDto> updateUserPersonal(@PathVariable("id") Long id,
-                                                              @PathVariable("personalId") Long personalId, @RequestBody UserPersonalDto userPersonalDto) {
+                                                              @PathVariable("personalId") Long personalId,
+                                                              @RequestBody UserPersonalDto userPersonalDto,
+                                                              @RequestHeader("user-id") Long userId) {
+        if (id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         return new ResponseEntity<>(userPersonalService.updateUserPersonal(personalId, userPersonalDto), HttpStatus.OK);
 
     }
 
     @GetMapping(path = {"/api/v1/users/{id}/pin"})
-    public ResponseEntity<UserDto> pinCheckAvailability(@PathVariable("id") Long id) {
+    public ResponseEntity<UserDto> pinCheckAvailability(@PathVariable("id") Long id,
+                                                        @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -203,28 +200,48 @@ public class UserController {
 
     @PostMapping(path = {"/api/v1/users/{id}/pin"})
     public ResponseEntity<UserDto> createNewPin(@PathVariable("id") Long id,
-                                                @Valid @RequestBody CreateNewPin createNewPin) throws Exception {
+                                                @Valid @RequestBody CreateNewPin createNewPin,
+                                                @RequestHeader("user-id") Long userId) throws Exception {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         userService.createNewPin(id, createNewPin);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping(path = {"/api/v1/users/{id}/pin"})
-    public ResponseEntity<UserDto> updatePin(@PathVariable("id") Long id, @Valid @RequestBody ChangePin changePin)
+    public ResponseEntity<UserDto> updatePin(@PathVariable("id") Long id,
+                                             @Valid @RequestBody ChangePin changePin,
+                                             @RequestHeader("user-id") Long userId)
             throws Exception {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         userService.updatePin(id, changePin);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(path = {"/api/v1/users/{id}/resetPin"})
-    public ResponseEntity<OtpDto> resetPin(@PathVariable("id") Long id, @Valid @RequestBody ResetPin resetPin)
+    public ResponseEntity<OtpDto> resetPin(@PathVariable("id") Long id,
+                                           @Valid @RequestBody ResetPin resetPin,
+                                           @RequestHeader("user-id") Long userId)
             throws Exception {
+        if (!id.equals(userId)) {
+            throw new NotFoundException();
+        }
         userService.resetPin(id, resetPin);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile"})
     public ResponseEntity<?> uploadPhotoProfile(@PathVariable("id") Long id,
-                                                @PathVariable("personalId") Long personalId, @RequestParam("file") MultipartFile file) throws Exception {
+                                                @PathVariable("personalId") Long personalId,
+                                                @RequestParam("file") MultipartFile file,
+                                                @RequestHeader("user-id") Long userId) throws Exception {
+
+        if (!id.equals(userId)) {
+            throw new NotFoundException();
+        }
         // String fileName = fileStorageService.storeFile(file);
         UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalService.savePhotoProfile(personalId,
                 file);
@@ -241,7 +258,12 @@ public class UserController {
 
     @GetMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}"})
     public ResponseEntity<UserPersonalPhotoProfileDto> getPhotoProfileData(@PathVariable("id") Long id,
-                                                                           @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+                                                                           @PathVariable("personalId") Long personalId,
+                                                                           @PathVariable("photoProfileId") Long photoProfileId,
+                                                                           @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
@@ -253,7 +275,12 @@ public class UserController {
 
     @DeleteMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}"})
     public ResponseEntity<?> deletePhotoProfile(@PathVariable("id") Long id,
-                                                @PathVariable("personalId") Long personalId, @PathVariable("photoProfileId") Long photoProfileId) {
+                                                @PathVariable("personalId") Long personalId,
+                                                @PathVariable("photoProfileId") Long photoProfileId,
+                                                @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
         Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
@@ -282,7 +309,6 @@ public class UserController {
         user.setOfficialId(userDto.getOfficialId());
         user.setUserGroup(UserGroupEnum.NETIZEN);
         User updatedUser = userRepository.save(user);
-        log.info("Parent -> {}", updatedUser.getParent());
         if (updatedUser.getParent() != null) {
             // setup point
             pointService.createPoint(userId);
