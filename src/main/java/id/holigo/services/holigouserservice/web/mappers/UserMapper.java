@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import id.holigo.services.common.model.UserDto;
 import id.holigo.services.holigouserservice.domain.User;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +20,6 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "pin", ignore = true)
     @Mapping(target = "oneTimePassword", ignore = true)
-    @Mapping(target = "isOfficialAccount", ignore = true)
     @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "emailVerifiedAt", ignore = true)
     @Mapping(target = "credentialsNonExpired", ignore = true)
