@@ -11,15 +11,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -35,6 +32,9 @@ public class UserReferral {
 
     @Column(columnDefinition = "varchar(20)", unique = true, nullable = false)
     private String referral;
+
+    @Column(columnDefinition = "smallint(2) default 1")
+    private Integer changeGranted;
 
     @CreationTimestamp
     private Timestamp createdAt;

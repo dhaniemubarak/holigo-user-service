@@ -18,6 +18,8 @@ public class UserReferralDto implements Serializable {
 
     private String referral;
 
+    private Integer changeGranted;
+
     private String name;
 
     private String photoProfileUrl;

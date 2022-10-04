@@ -174,7 +174,7 @@ public class UserController {
                                                               @PathVariable("personalId") Long personalId,
                                                               @RequestBody UserPersonalDto userPersonalDto,
                                                               @RequestHeader("user-id") Long userId) {
-        if (id.equals(userId)) {
+        if (!id.equals(userId)) {
             throw new ForbiddenException();
         }
         return new ResponseEntity<>(userPersonalService.updateUserPersonal(personalId, userPersonalDto), HttpStatus.OK);
