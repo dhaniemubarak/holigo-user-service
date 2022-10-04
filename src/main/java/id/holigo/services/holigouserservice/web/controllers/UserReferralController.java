@@ -2,6 +2,7 @@ package id.holigo.services.holigouserservice.web.controllers;
 
 import java.util.Optional;
 
+import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -106,6 +107,9 @@ public class UserReferralController {
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findById(id);
         if (fetchUserReferral.isPresent()) {
             UserReferral userReferral = fetchUserReferral.get();
+            if (userReferral.getChangeGranted() < 1) {
+                throw new ForbiddenException();
+            }
             if (userReferral.getUser().getId().equals(userId)) {
                 userReferral.setReferral(userReferralDto.getReferral().toUpperCase());
                 UserReferral updatedUserReferral = userReferralRepository.save(userReferral);
