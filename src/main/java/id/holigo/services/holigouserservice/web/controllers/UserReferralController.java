@@ -112,6 +112,7 @@ public class UserReferralController {
             }
             if (userReferral.getUser().getId().equals(userId)) {
                 userReferral.setReferral(userReferralDto.getReferral().toUpperCase());
+                userReferral.setChangeGranted(userReferral.getChangeGranted() - 1);
                 UserReferral updatedUserReferral = userReferralRepository.save(userReferral);
                 return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(updatedUserReferral),
                         HttpStatus.OK);
