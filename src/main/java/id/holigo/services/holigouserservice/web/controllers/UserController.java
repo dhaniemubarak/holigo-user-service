@@ -92,7 +92,8 @@ public class UserController {
             User savedUser = userService.save(userDto);
             userService.createOneTimePassword(savedUser, "0921");
             Collection<String> authorities = new ArrayList<>();
-            savedUser.getAuthorities().forEach(authority -> authorities.add(authority.getRole()));
+            authorities.add("USER");
+//            savedUser.getAuthorities().forEach(authority -> authorities.add(authority.getRole()));
             UserAuthenticationDto userAuthenticationDto = UserAuthenticationDto.builder().id(savedUser.getId())
                     .phoneNumber(savedUser.getPhoneNumber()).accountStatus(savedUser.getAccountStatus())
                     .type(savedUser.getType()).authorities(authorities).oneTimePassword("0921")

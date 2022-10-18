@@ -85,8 +85,8 @@ public class UserServiceImpl implements UserService {
 
         user.setUserPersonal(savedUserPersonal);
 
-        Optional<Authority> fetchAuth = authorityRepository.findById(2);
-        GuestServiceImpl.signAuth(fetchAuth, user, userRepository);
+//        Optional<Authority> fetchAuth = authorityRepository.findById(2);
+//        GuestServiceImpl.signAuth(fetchAuth, user, userRepository);
         User userSaved = userRepository.save(user);
 
         if (userSaved.getId() != null) {
