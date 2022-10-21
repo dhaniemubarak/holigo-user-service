@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import id.holigo.services.common.model.*;
 import id.holigo.services.holigouserservice.domain.*;
 import id.holigo.services.holigouserservice.repositories.*;
-import id.holigo.services.holigouserservice.services.guest.GuestServiceImpl;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
 import id.holigo.services.holigouserservice.web.model.DeletedUserDto;
@@ -97,6 +96,9 @@ public class UserServiceImpl implements UserService {
                         .userGroup(UserGroupEnum.NETIZEN).build());
                 userReferralService.createRandomReferral(userSaved.getId());
             }
+            UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
+            userReferral.setFollowers(userReferral.getFollowers() + 1);
+            userReferralRepository.save(userReferral);
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
             return userSaved;

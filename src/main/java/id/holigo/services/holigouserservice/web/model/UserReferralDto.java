@@ -28,5 +28,7 @@ public class UserReferralDto implements Serializable {
 
     private String note;
 
+    private Integer followers;
+
     private ReferralStatusEnum status;
 }

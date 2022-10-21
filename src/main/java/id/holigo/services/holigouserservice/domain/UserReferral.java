@@ -42,6 +42,8 @@ public class UserReferral {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
+    private Integer followers;
+
     @Enumerated(EnumType.STRING)
     private ReferralStatusEnum status;
 }
