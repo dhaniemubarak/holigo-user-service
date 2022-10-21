@@ -43,7 +43,7 @@ public class UserReferralServiceImpl implements UserReferralService {
                 userReferral.setUser(fetchUser.get());
                 userReferral.setReferral(referral);
                 userReferral.setStatus(ReferralStatusEnum.ACTIVE);
-                userReferral.setChangeGranted(0);
+                userReferral.setChangeGranted(1);
                 userReferral.setFollowers(0);
                 return userReferralRepository.save(userReferral);
             } else {

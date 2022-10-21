@@ -5,6 +5,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.domain.UserReferral;
+import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.services.*;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
@@ -49,6 +51,8 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 @RestController
 public class UserController {
+
+    private final UserReferralRepository userReferralRepository;
 
     private final UserService userService;
 
@@ -319,7 +323,9 @@ public class UserController {
                     .userGroup(UserGroupEnum.NETIZEN).build());
             // create referral
             userReferralService.createRandomReferral(userId);
-
+            UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
+            userReferral.setFollowers(userReferral.getFollowers() + 1);
+            userReferralRepository.save(userReferral);
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

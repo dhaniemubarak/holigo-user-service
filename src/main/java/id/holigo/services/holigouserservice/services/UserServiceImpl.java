@@ -11,6 +11,7 @@ import id.holigo.services.holigouserservice.repositories.*;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
 import id.holigo.services.holigouserservice.web.model.DeletedUserDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.transaction.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -66,10 +68,9 @@ public class UserServiceImpl implements UserService {
             throw new Exception("Failed save personal data");
         }
 
-        if (userDto.getReferral() == null && !this.defaultReferral.isEmpty()) {
-            userDto.setReferral(this.defaultReferral);
+        if (userDto.getReferral() != null) {
+            userDto = fetchReferral(userDto);
         }
-        userDto = fetchReferral(userDto);
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
@@ -285,21 +286,26 @@ public class UserServiceImpl implements UserService {
 
     public UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
-        if (userDto.getReferral() != null) {
-            UserReferral userReferral;
-            UserParentDto parent;
-            Long officialId = null;
-            userReferral = userReferralRepository.findByReferral(userDto.getReferral())
-                    .orElseThrow();
+        try {
+            if (userDto.getReferral() != null) {
+                UserReferral userReferral;
+                UserParentDto parent;
+                Long officialId = null;
+                userReferral = userReferralRepository.findByReferral(userDto.getReferral())
+                        .orElseThrow();
 
-            userDto.setUserGroup(UserGroupEnum.NETIZEN);
-            parent = userMapper.userToUserParentDto(userReferral.getUser());
-            if (parent.getOfficialId() != null) {
-                officialId = parent.getOfficialId();
+                userDto.setUserGroup(UserGroupEnum.NETIZEN);
+                parent = userMapper.userToUserParentDto(userReferral.getUser());
+                if (parent.getOfficialId() != null) {
+                    officialId = parent.getOfficialId();
+                }
+                userDto.setOfficialId(officialId);
+                userDto.setParent(parent);
             }
-            userDto.setOfficialId(officialId);
-            userDto.setParent(parent);
+        } catch (Exception e) {
+            log.info("Error fetch referral -> {}", e.getMessage());
         }
+
         return userDto;
     }
 
