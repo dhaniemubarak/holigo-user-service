@@ -96,10 +96,10 @@ public class UserServiceImpl implements UserService {
                         .userId(userSaved.getId())
                         .userGroup(UserGroupEnum.NETIZEN).build());
                 userReferralService.createRandomReferral(userSaved.getId());
+                UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
+                userReferral.setFollowers(userReferral.getFollowers() + 1);
+                userReferralRepository.save(userReferral);
             }
-            UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
-            userReferral.setFollowers(userReferral.getFollowers() + 1);
-            userReferralRepository.save(userReferral);
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
             return userSaved;
