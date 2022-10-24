@@ -1,9 +1,5 @@
 package id.holigo.services.holigouserservice.services.guest;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,10 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import id.holigo.services.common.model.AccountStatusEnum;
 import id.holigo.services.common.model.UserGroupEnum;
-import id.holigo.services.holigouserservice.domain.Authority;
 import id.holigo.services.holigouserservice.domain.User;
 import id.holigo.services.holigouserservice.domain.UserDevice;
-import id.holigo.services.holigouserservice.repositories.AuthorityRepository;
 import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
@@ -25,17 +19,26 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class GuestServiceImpl implements GuestService {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private UserDeviceMapper userDeviceMapper;
 
-    @Autowired
     private UserDeviceRepository userDeviceRepository;
 
     @Autowired
-    private final AuthorityRepository authorityRepository;
+    public void setUserDeviceMapper(UserDeviceMapper userDeviceMapper) {
+        this.userDeviceMapper = userDeviceMapper;
+    }
+
+    @Autowired
+    public void setUserDeviceRepository(UserDeviceRepository userDeviceRepository) {
+        this.userDeviceRepository = userDeviceRepository;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Transactional
     @Override
@@ -45,7 +48,7 @@ public class GuestServiceImpl implements GuestService {
         UserDevice userDevice = userDeviceMapper.userDeviceDtoToUserDevice(guestRegisterDto.getUserDevices().get(0));
         name = "Guest " + userDevice.getManufacturer() + " " + userDevice.getModel();
 
-        Optional<Authority> fetchAuth = authorityRepository.findById(1);
+//        Optional<Authority> fetchAuth = authorityRepository.findById(1);
 
         User user = new User();
         user.setMobileToken(guestRegisterDto.getMobileToken());
@@ -57,7 +60,7 @@ public class GuestServiceImpl implements GuestService {
         user.addUserDevice(userDevice);
         user.setIsOfficialAccount(false);
 
-        signAuth(fetchAuth, user, userRepository);
+//        signAuth(fetchAuth, user, userRepository);
         User userSaved = userRepository.save(user);
         if (userSaved.getId() != null) {
             userDevice.setUser(userSaved);
@@ -67,15 +70,15 @@ public class GuestServiceImpl implements GuestService {
         return null;
     }
 
-    public static void signAuth(Optional<Authority> fetchAuth, User user, UserRepository userRepository) {
-        if (fetchAuth.isPresent()) {
-            Authority auth = fetchAuth.get();
-            Set<Authority> roles = new HashSet<>();
-            roles.add(auth);
-            user.setAuthorities(roles);
-        }
-
-    }
+//    public static void signAuth(Optional<Authority> fetchAuth, User user, UserRepository userRepository) {
+//        if (fetchAuth.isPresent()) {
+//            Authority auth = fetchAuth.get();
+//            Set<Authority> roles = new HashSet<>();
+//            roles.add(auth);
+//            user.setAuthorities(roles);
+//        }
+//
+//    }
 
     public void updateGuest(User user) {
         userRepository.save(user);

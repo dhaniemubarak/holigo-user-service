@@ -25,13 +25,13 @@ public interface UserService {
 
     UserPaginate getAllUser();
 
-    UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception;
+    void createNewPin(Long userId, CreateNewPin createNewPin) throws Exception;
 
-    UserDto resetPin(Long userId, ResetPin resetPin) throws Exception;
+    void resetPin(Long userId, ResetPin resetPin) throws Exception;
 
-    UserDto updatePin(Long userId, ChangePin changePin) throws Exception;
+    void updatePin(Long userId, ChangePin changePin) throws Exception;
 
-    void addAuthorityToUser(String phoneNumber, String role);
+//    void addAuthorityToUser(String phoneNumber, String role);
 
     void createOneTimePassword(User user, String oneTimePassword);
 

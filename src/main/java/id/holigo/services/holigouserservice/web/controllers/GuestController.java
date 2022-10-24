@@ -44,16 +44,14 @@ public class GuestController {
 
     @PostMapping("/api/v1/guests")
     public ResponseEntity<OauthAccessTokenDto> createGuest(@RequestBody GuestRegisterDto guestRegisterDto)
-            throws JsonMappingException, JsonProcessingException, JMSException {
+            throws JsonProcessingException, JMSException {
         User guest = guestService.createGuest(guestRegisterDto);
 
         if (guest.getId() != null) {
-            OauthAccessTokenDto oauthAccessTokenDto = null;
+            OauthAccessTokenDto oauthAccessTokenDto;
             userService.createOneTimePassword(guest, "0921");
             Collection<String> authorities = new ArrayList<>();
-            guest.getAuthorities().forEach(authority -> {
-                authorities.add(authority.getRole());
-            });
+            guest.getAuthorities().forEach(authority -> authorities.add(guest.getType()));
             UserAuthenticationDto userAuthenticationDto = UserAuthenticationDto.builder().id(guest.getId())
                     .phoneNumber(guest.getPhoneNumber()).accountStatus(guest.getAccountStatus()).type(guest.getType())
                     .authorities(authorities).oneTimePassword("0921")

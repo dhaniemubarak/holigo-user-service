@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
     @Value("${default.referral}")
     public String defaultReferral;
     private final UserRepository userRepository;
-    private final AuthorityRepository authorityRepository;
     private final UserMapper userMapper;
     private final UserDeviceMapper userDeviceMapper;
     private final UserDeviceRepository userDeviceRepository;
@@ -68,11 +67,12 @@ public class UserServiceImpl implements UserService {
             throw new Exception("Failed save personal data");
         }
 
-        if (userDto.getReferral() != null) {
-            userDto = fetchReferral(userDto);
-        }
+        log.info("BEFORE FETCH REFERRAL");
+        fetchReferral(userDto);
+        log.info("AFTER FETCH REFERRAL");
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
+        user.setOneTimePassword(new BCryptPasswordEncoder().encode("0921"));
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         if (this.otpProviderPriority.equals("EMAIL")) {
             user.setEmailStatus(EmailStatusEnum.CONFIRMED);
@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
+    public void createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
         Optional<User> fetchUser = userRepository.findById(userId);
         if (fetchUser.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -212,11 +212,11 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new Exception("Failed set PIN");
         }
-        return userMapper.userToUserDto(user);
+        userMapper.userToUserDto(user);
     }
 
     @Override
-    public UserDto updatePin(Long userId, ChangePin changePin) throws Exception {
+    public void updatePin(Long userId, ChangePin changePin) throws Exception {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -232,19 +232,19 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new Exception("Failed change PIN");
         }
-        return userMapper.userToUserDto(fetchUser);
+        userMapper.userToUserDto(fetchUser);
     }
 
-    @Override
-    public void addAuthorityToUser(String phoneNumber, String role) {
-        Optional<User> fetchUser = userRepository.findByPhoneNumber(phoneNumber);
-        if (fetchUser.isEmpty()) {
-            throw new NotFoundException("User not found");
-        }
-        User user = fetchUser.get();
-        Authority authority = authorityRepository.findByRole(role);
-        user.getAuthorities().add(authority);
-    }
+//    @Override
+//    public void addAuthorityToUser(String phoneNumber, String role) {
+//        Optional<User> fetchUser = userRepository.findByPhoneNumber(phoneNumber);
+//        if (fetchUser.isEmpty()) {
+//            throw new NotFoundException("User not found");
+//        }
+//        User user = fetchUser.get();
+//        Authority authority = authorityRepository.findByRole(role);
+//        user.getAuthorities().add(authority);
+//    }
 
     @Override
     public void createOneTimePassword(User user, String oneTimePassword) {
@@ -261,7 +261,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto resetPin(Long userId, ResetPin resetPin) throws Exception {
+    public void resetPin(Long userId, ResetPin resetPin) throws Exception {
         Optional<User> fetchUser = userRepository.findById(userId);
         if (fetchUser.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -281,7 +281,7 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ForbiddenException("OTP is wrong!");
         }
-        return userMapper.userToUserDto(user);
+        userMapper.userToUserDto(user);
     }
 
     public UserDto fetchReferral(UserDto userDto) {

@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-
 import id.holigo.services.common.model.OtpDto;
 import id.holigo.services.common.model.OtpStatusEnum;
 import id.holigo.services.holigouserservice.services.otp.OtpService;
@@ -42,9 +41,7 @@ public class OauthUserListener {
         if (fetchUser.isPresent()) {
             User user = fetchUser.get();
             Collection<String> authorities = new ArrayList<>();
-            user.getAuthorities().forEach(authority -> {
-                authorities.add(authority.getRole());
-            });
+            authorities.add(user.getType());
             userAuthenticationDto.setId(user.getId());
             userAuthenticationDto.setOneTimePassword(user.getOneTimePassword());
             userAuthenticationDto.setAccountNonExpired(user.getAccountNonExpired());

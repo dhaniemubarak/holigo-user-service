@@ -44,9 +44,7 @@ import id.holigo.services.holigouserservice.web.requests.ChangePin;
 import id.holigo.services.holigouserservice.web.requests.CreateNewPin;
 import id.holigo.services.holigouserservice.web.requests.ResetPin;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @Validated
 @RestController
@@ -94,7 +92,6 @@ public class UserController {
             }
             userDto.setIsOfficialAccount(false);
             User savedUser = userService.save(userDto);
-            userService.createOneTimePassword(savedUser, "0921");
             Collection<String> authorities = new ArrayList<>();
             authorities.add("USER");
 //            savedUser.getAuthorities().forEach(authority -> authorities.add(authority.getRole()));
@@ -107,6 +104,7 @@ public class UserController {
                     .credentialsNonExpired(savedUser.getCredentialsNonExpired()).enabled(savedUser.getEnabled())
                     .build();
             oauthAccessTokenDto = oauthService.createAccessToken(userAuthenticationDto);
+            userService.resetOneTimePassword(savedUser);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setLocation(
                     UriComponentsBuilder.fromPath("/api/v1/users/{id}").buildAndExpand(savedUser.getId()).toUri());
@@ -274,8 +272,13 @@ public class UserController {
         if (fetchPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo profile not found");
         }
-        return new ResponseEntity<>(userPersonalPhotoProfileMapper
-                .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(fetchPhotoProfile.get()), HttpStatus.OK);
+        UserPersonalPhotoProfile userPersonalPhotoProfile = fetchPhotoProfile.get();
+        if (userPersonalPhotoProfile.getUserPersonal().getId().equals(personalId)) {
+            return new ResponseEntity<>(userPersonalPhotoProfileMapper
+                    .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(fetchPhotoProfile.get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
     }
 
     @DeleteMapping(path = {"/api/v1/users/{id}/userPersonal/{personalId}/photoProfile/{photoProfileId}"})
@@ -283,13 +286,17 @@ public class UserController {
                                                 @PathVariable("personalId") Long personalId,
                                                 @PathVariable("photoProfileId") Long photoProfileId,
                                                 @RequestHeader("user-id") Long userId) {
-        if (!id.equals(userId)) {
+        if (!Objects.equals(id, userId)) {
             throw new ForbiddenException();
         }
         Optional<UserPersonalPhotoProfile> fetchPhotoProfile = userPersonalPhotoProfileRepository
                 .findById(photoProfileId);
         if (fetchPhotoProfile.isEmpty()) {
             throw new NotFoundException("Photo profile not found");
+        }
+        UserPersonalPhotoProfile userPersonalPhotoProfile = fetchPhotoProfile.get();
+        if (!Objects.equals(userPersonalPhotoProfile.getUserPersonal().getId(), personalId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         if (userPersonalService.deletePhotoProfile(photoProfileId)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
