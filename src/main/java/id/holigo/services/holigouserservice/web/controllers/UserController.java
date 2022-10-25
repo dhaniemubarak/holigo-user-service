@@ -352,5 +352,14 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/api/v1/users")
+    public ResponseEntity<HttpStatus> emailCheck(@RequestParam("email") String email) {
+        Optional<User> fetchUser = userRepository.findByEmail(email);
+        if (fetchUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
 
 }
