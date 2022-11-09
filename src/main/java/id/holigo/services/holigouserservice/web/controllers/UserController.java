@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import id.holigo.services.common.model.*;
+import id.holigo.services.holigouserservice.repositories.MobileToken;
 import id.holigo.services.holigouserservice.services.*;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
@@ -197,6 +198,20 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(path = {"/api/v1/users/{id}/mobileToken"})
+    public ResponseEntity<String> getMobileToken(@PathVariable("id") Long id,
+                                                 @RequestHeader("user-id") Long userId) {
+        if (!id.equals(userId)) {
+            throw new ForbiddenException();
+        }
+        Optional<MobileToken> fetchMobileToken = userRepository.findMobileTokenById(userId);
+        if (fetchMobileToken.isPresent()) {
+            String mobileToken = fetchMobileToken.get().getMobileToken();
+            return new ResponseEntity<>(mobileToken, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(path = {"/api/v1/users/{id}/pin"})
