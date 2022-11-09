@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import id.holigo.services.holigouserservice.domain.ReferralStatusEnum;
 import id.holigo.services.holigouserservice.domain.User;
-import id.holigo.services.holigouserservice.domain.UserPersonal;
 import id.holigo.services.holigouserservice.domain.UserReferral;
 import id.holigo.services.holigouserservice.repositories.UserReferralRepository;
 import id.holigo.services.holigouserservice.repositories.UserRepository;
@@ -18,11 +17,18 @@ import io.netty.util.internal.ThreadLocalRandom;
 @Service
 public class UserReferralServiceImpl implements UserReferralService {
 
-    @Autowired
     private UserReferralRepository userReferralRepository;
 
-    @Autowired
     private UserRepository userRepository;
+    @Autowired
+    public void setUserReferralRepository(UserReferralRepository userReferralRepository) {
+        this.userReferralRepository = userReferralRepository;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Transactional
     @Override
@@ -37,8 +43,9 @@ public class UserReferralServiceImpl implements UserReferralService {
                 userReferral.setUser(fetchUser.get());
                 userReferral.setReferral(referral);
                 userReferral.setStatus(ReferralStatusEnum.ACTIVE);
-                UserReferral savedUserReferral = userReferralRepository.save(userReferral);
-                return savedUserReferral;
+                userReferral.setChangeGranted(1);
+                userReferral.setFollowers(0);
+                return userReferralRepository.save(userReferral);
             } else {
                 throw new NotFoundException("User not found");
             }
@@ -56,7 +63,7 @@ public class UserReferralServiceImpl implements UserReferralService {
         boolean isUnavailable = true;
         String referral;
         do {
-            referral = name.toUpperCase() + Integer.toString(number);
+            referral = name.toUpperCase() + number;
             number++;
             Optional<UserReferral> fetchUserReferral = userReferralRepository.findByReferral(referral);
             if (fetchUserReferral.isEmpty()) {

@@ -19,7 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
+//@Entity
 public class Authority {
 
     @Id
@@ -28,6 +28,6 @@ public class Authority {
 
     private String role;
 
-    @ManyToMany(mappedBy = "authorities")
+//    @ManyToMany(mappedBy = "authorities")
     private Set<User> users;
 }

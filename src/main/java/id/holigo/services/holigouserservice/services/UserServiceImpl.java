@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import id.holigo.services.common.model.*;
 import id.holigo.services.holigouserservice.domain.*;
 import id.holigo.services.holigouserservice.repositories.*;
-import id.holigo.services.holigouserservice.services.guest.GuestServiceImpl;
 import id.holigo.services.holigouserservice.services.holiclub.HoliclubService;
 import id.holigo.services.holigouserservice.services.point.PointService;
 import id.holigo.services.holigouserservice.web.model.DeletedUserDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.transaction.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,7 +39,6 @@ public class UserServiceImpl implements UserService {
     @Value("${default.referral}")
     public String defaultReferral;
     private final UserRepository userRepository;
-    private final AuthorityRepository authorityRepository;
     private final UserMapper userMapper;
     private final UserDeviceMapper userDeviceMapper;
     private final UserDeviceRepository userDeviceRepository;
@@ -67,12 +67,12 @@ public class UserServiceImpl implements UserService {
             throw new Exception("Failed save personal data");
         }
 
-        if (userDto.getReferral() == null && !this.defaultReferral.isEmpty()) {
-            userDto.setReferral(this.defaultReferral);
-        }
-        userDto = fetchReferral(userDto);
+        log.info("BEFORE FETCH REFERRAL");
+        fetchReferral(userDto);
+        log.info("AFTER FETCH REFERRAL");
         User user = userMapper.userDtoToUser(userDto);
         user.setType("USER");
+        user.setOneTimePassword(new BCryptPasswordEncoder().encode("0921"));
         user.setAccountStatus(AccountStatusEnum.ACTIVE);
         if (this.otpProviderPriority.equals("EMAIL")) {
             user.setEmailStatus(EmailStatusEnum.CONFIRMED);
@@ -96,6 +96,9 @@ public class UserServiceImpl implements UserService {
                         .userId(userSaved.getId())
                         .userGroup(UserGroupEnum.NETIZEN).build());
                 userReferralService.createRandomReferral(userSaved.getId());
+                UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
+                userReferral.setFollowers(userReferral.getFollowers() + 1);
+                userReferralRepository.save(userReferral);
             }
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
@@ -194,7 +197,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
+    public void createNewPin(Long userId, CreateNewPin createNewPin) throws Exception {
         Optional<User> fetchUser = userRepository.findById(userId);
         if (fetchUser.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -209,11 +212,11 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new Exception("Failed set PIN");
         }
-        return userMapper.userToUserDto(user);
+        userMapper.userToUserDto(user);
     }
 
     @Override
-    public UserDto updatePin(Long userId, ChangePin changePin) throws Exception {
+    public void updatePin(Long userId, ChangePin changePin) throws Exception {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -229,19 +232,19 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new Exception("Failed change PIN");
         }
-        return userMapper.userToUserDto(fetchUser);
+        userMapper.userToUserDto(fetchUser);
     }
 
-    @Override
-    public void addAuthorityToUser(String phoneNumber, String role) {
-        Optional<User> fetchUser = userRepository.findByPhoneNumber(phoneNumber);
-        if (fetchUser.isEmpty()) {
-            throw new NotFoundException("User not found");
-        }
-        User user = fetchUser.get();
-        Authority authority = authorityRepository.findByRole(role);
-        user.getAuthorities().add(authority);
-    }
+//    @Override
+//    public void addAuthorityToUser(String phoneNumber, String role) {
+//        Optional<User> fetchUser = userRepository.findByPhoneNumber(phoneNumber);
+//        if (fetchUser.isEmpty()) {
+//            throw new NotFoundException("User not found");
+//        }
+//        User user = fetchUser.get();
+//        Authority authority = authorityRepository.findByRole(role);
+//        user.getAuthorities().add(authority);
+//    }
 
     @Override
     public void createOneTimePassword(User user, String oneTimePassword) {
@@ -258,7 +261,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto resetPin(Long userId, ResetPin resetPin) throws Exception {
+    public void resetPin(Long userId, ResetPin resetPin) throws Exception {
         Optional<User> fetchUser = userRepository.findById(userId);
         if (fetchUser.isEmpty()) {
             throw new NotFoundException("User not found");
@@ -278,26 +281,31 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ForbiddenException("OTP is wrong!");
         }
-        return userMapper.userToUserDto(user);
+        userMapper.userToUserDto(user);
     }
 
     public UserDto fetchReferral(UserDto userDto) {
         userDto.setUserGroup(UserGroupEnum.MEMBER);
-        if (userDto.getReferral() != null) {
-            UserReferral userReferral;
-            UserParentDto parent;
-            Long officialId = null;
-            userReferral = userReferralRepository.findByReferral(userDto.getReferral())
-                    .orElseThrow();
+        try {
+            if (userDto.getReferral() != null) {
+                UserReferral userReferral;
+                UserParentDto parent;
+                Long officialId = null;
+                userReferral = userReferralRepository.findByReferral(userDto.getReferral())
+                        .orElseThrow();
 
-            userDto.setUserGroup(UserGroupEnum.NETIZEN);
-            parent = userMapper.userToUserParentDto(userReferral.getUser());
-            if (parent.getOfficialId() != null) {
-                officialId = parent.getOfficialId();
+                userDto.setUserGroup(UserGroupEnum.NETIZEN);
+                parent = userMapper.userToUserParentDto(userReferral.getUser());
+                if (parent.getOfficialId() != null) {
+                    officialId = parent.getOfficialId();
+                }
+                userDto.setOfficialId(officialId);
+                userDto.setParent(parent);
             }
-            userDto.setOfficialId(officialId);
-            userDto.setParent(parent);
+        } catch (Exception e) {
+            log.info("Error fetch referral -> {}", e.getMessage());
         }
+
         return userDto;
     }
 

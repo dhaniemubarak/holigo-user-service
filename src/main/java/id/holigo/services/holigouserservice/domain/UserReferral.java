@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -41,6 +42,8 @@ public class UserReferral {
 
     @UpdateTimestamp
     private Timestamp updatedAt;
+
+    private Integer followers;
 
     @Enumerated(EnumType.STRING)
     private ReferralStatusEnum status;

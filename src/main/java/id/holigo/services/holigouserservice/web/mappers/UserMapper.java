@@ -24,7 +24,6 @@ public interface UserMapper {
     @Mapping(target = "emailVerifiedAt", ignore = true)
     @Mapping(target = "credentialsNonExpired", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "authority", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "accountNonLocked", ignore = true)
     @Mapping(target = "accountNonExpired", ignore = true)

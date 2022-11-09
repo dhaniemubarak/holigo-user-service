@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import javax.persistence.*;
@@ -25,7 +24,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Singular;
 
 @Getter
 @Setter
@@ -86,16 +84,10 @@ public class User {
 
     private Timestamp deletedAt;
 
-    @Column(nullable = true)
     private String mobileToken;
 
-    @Singular
-    @ManyToMany(fetch = EAGER)
-    @JoinTable(name = "user_authority", joinColumns = {
-            @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
-            @JoinColumn(name = "authority_id", referencedColumnName = "id")})
-    @JsonBackReference
-    private Set<Authority> authorities;
+    @Transient
+    private Set<String> authorities;
 
     @Builder.Default
     @OneToMany(mappedBy = "user")
