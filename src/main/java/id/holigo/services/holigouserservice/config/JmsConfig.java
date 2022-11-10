@@ -18,7 +18,6 @@ public class JmsConfig {
     public static final String CREATE_ACCESS_TOKEN_QUEUE = "create-access-token-queue";
     public static final String OTP_RESET_PIN_VALIDATION_QUEUE = "request-otp-reset-pin-validation";
     public static final String UPDATE_USER_GROUP_IN_USER_QUEUE = "update-user-group-in-user";
-    public static final String CREATE_USER_POINT = "create-user-point";
     public static final String CREATE_USER_GROUP = "create-user-group";
 
     @Bean
