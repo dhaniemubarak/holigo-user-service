@@ -1,8 +1,12 @@
 package id.holigo.services.holigouserservice.web.controllers;
 
+import java.util.Objects;
 import java.util.Optional;
 
+import id.holigo.services.holigouserservice.domain.QueueUserReferralPoint;
+import id.holigo.services.holigouserservice.repositories.QueueUserReferralPointRepository;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,17 +28,37 @@ import id.holigo.services.holigouserservice.services.UserReferralService;
 import id.holigo.services.holigouserservice.web.mappers.UserReferralMapper;
 import id.holigo.services.holigouserservice.web.model.UserReferralDto;
 
+@Slf4j
 @RestController
 public class UserReferralController {
 
-    @Autowired
     private UserReferralRepository userReferralRepository;
 
-    @Autowired
     private UserReferralMapper userReferralMapper;
 
-    @Autowired
     private UserReferralService userReferralService;
+
+    private QueueUserReferralPointRepository queueUserReferralPointRepository;
+
+    @Autowired
+    public void setQueueUserReferralPointRepository(QueueUserReferralPointRepository queueUserReferralPointRepository) {
+        this.queueUserReferralPointRepository = queueUserReferralPointRepository;
+    }
+
+    @Autowired
+    public void setUserReferralRepository(UserReferralRepository userReferralRepository) {
+        this.userReferralRepository = userReferralRepository;
+    }
+
+    @Autowired
+    public void setUserReferralMapper(UserReferralMapper userReferralMapper) {
+        this.userReferralMapper = userReferralMapper;
+    }
+
+    @Autowired
+    public void setUserReferralService(UserReferralService userReferralService) {
+        this.userReferralService = userReferralService;
+    }
 
     @GetMapping("/api/v1/userReferral")
     public ResponseEntity<UserReferralDto> findReferral(@RequestParam("referral") String referral) {
@@ -81,7 +105,7 @@ public class UserReferralController {
 
     @GetMapping({"/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}"})
     public ResponseEntity<UserReferralDto> getReferral(@PathVariable("userReferralId") Long id,
-                                                       @RequestHeader("user-id") Long userId) {
+                                                       @RequestHeader("user-id") Long userId, @PathVariable("userId") Long userIdTwo) {
         Optional<UserReferral> fetchUserReferral = userReferralRepository.findById(id);
         if (fetchUserReferral.isPresent()) {
             UserReferral userReferral = fetchUserReferral.get();
@@ -97,7 +121,7 @@ public class UserReferralController {
     @Transactional
     @PutMapping({"/api/v1/userReferral/{userReferralId}", "/api/v1/users/{userId}/userReferral/{userReferralId}"})
     public ResponseEntity<UserReferralDto> updateReferral(@RequestBody UserReferralDto userReferralDto,
-                                                          @PathVariable("userReferralId") Long id, @RequestHeader("user-id") Long userId) {
+                                                          @PathVariable("userReferralId") Long id, @RequestHeader("user-id") Long userId, @PathVariable("userId") Long userIdTwo) {
 
         Optional<UserReferral> fetchUserReferralIsExists = userReferralRepository
                 .findByReferral(userReferralDto.getReferral());
@@ -121,5 +145,36 @@ public class UserReferralController {
             }
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    @PutMapping("/api/v1/users/{id}/userReferral")
+    public ResponseEntity<HttpStatus> risePoint(@RequestBody UserReferralDto userReferralDto, @PathVariable("id") Long id,
+                                                @RequestHeader("user-id") Long userId) {
+
+        if (!Objects.equals(id, userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Optional<UserReferral> fetchUserReferral = userReferralRepository.findByUserId(userId);
+        if (fetchUserReferral.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        UserReferral userReferral = fetchUserReferral.get();
+        try {
+            if (userReferral.getPoint() == null) {
+                userReferral.setPoint(userReferralDto.getPoint());
+            } else {
+                userReferral.setPoint(userReferral.getPoint() + userReferralDto.getPoint());
+            }
+            userReferralRepository.save(userReferral);
+        } catch (Exception e) {
+            log.error("Error : {}", e.getMessage());
+            QueueUserReferralPoint queueUserReferralPoint = QueueUserReferralPoint.builder()
+                    .userId(userId).point(userReferralDto.getPoint()).isRaised(false)
+                    .build();
+            queueUserReferralPointRepository.save(queueUserReferralPoint);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

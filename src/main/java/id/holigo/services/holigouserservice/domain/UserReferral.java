@@ -29,6 +29,7 @@ public class UserReferral {
     private Long id;
 
     @OneToOne
+    @JsonBackReference
     private User user;
 
     @Column(columnDefinition = "varchar(20)", unique = true, nullable = false)
@@ -44,6 +45,8 @@ public class UserReferral {
     private Timestamp updatedAt;
 
     private Integer followers;
+
+    private Integer point;
 
     @Enumerated(EnumType.STRING)
     private ReferralStatusEnum status;

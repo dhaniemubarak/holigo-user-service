@@ -30,5 +30,7 @@ public class UserReferralDto implements Serializable {
 
     private Integer followers;
 
+    private Integer point;
+
     private ReferralStatusEnum status;
 }
