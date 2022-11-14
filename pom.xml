@@ -11,7 +11,7 @@
     </parent>
     <groupId>id.holigo.services</groupId>
     <artifactId>holigo-user-service</artifactId>
-    <version>1.9.3</version>
+    <version>1.9.4</version>
     <name>holigo-user-service</name>
     <description>Holigo user service</description>
     <properties>
@@ -61,6 +61,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>2.1.214</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -169,7 +170,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${project.parent.version}</version>
                 <configuration>
                     <layers>
                         <enabled>true</enabled>
