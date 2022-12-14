@@ -49,6 +49,8 @@ public class UserServiceImpl implements UserService {
     private final HoliclubService holiclubService;
     private final PointService pointService;
 
+    private final QueueUserReferralFollowerRepository queueUserReferralFollowerRepository;
+
     private final DeletedUserRepository deletedUserRepository;
 
     @Override
@@ -96,9 +98,14 @@ public class UserServiceImpl implements UserService {
                         .userId(userSaved.getId())
                         .userGroup(UserGroupEnum.NETIZEN).build());
                 userReferralService.createRandomReferral(userSaved.getId());
-                UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
-                userReferral.setFollowers(userReferral.getFollowers() + 1);
-                userReferralRepository.save(userReferral);
+                boolean updatedUserReferral = userReferralService.updateUserFollower(userSaved.getParent().getId());
+                if (!updatedUserReferral) {
+                    queueUserReferralFollowerRepository.save(QueueUserReferralFollower.builder()
+                            .userId(userSaved.getParent().getId()).hasUpdate(false).build());
+                }
+//                UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
+//                userReferral.setFollowers(userReferral.getFollowers() + 1);
+//                userReferralRepository.save(userReferral);
             }
             userDevice.setUser(userSaved);
             userDeviceRepository.save(userDevice);
@@ -117,6 +124,13 @@ public class UserServiceImpl implements UserService {
         // resultUser.setType(userDto.getType());
         if (resultUser.getParent() != null) {
             fetchReferral(userDto);
+            if (userDto.getParent() != null) {
+                boolean updatedUserReferral = userReferralService.updateUserFollower(userDto.getParent().getId());
+                if (!updatedUserReferral) {
+                    queueUserReferralFollowerRepository.save(QueueUserReferralFollower.builder()
+                            .userId(userDto.getParent().getId()).hasUpdate(false).build());
+                }
+            }
         }
         return userMapper.userToUserDto(userRepository.save(resultUser));
     }

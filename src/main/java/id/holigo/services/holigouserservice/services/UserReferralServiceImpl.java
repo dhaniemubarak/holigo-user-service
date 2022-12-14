@@ -1,7 +1,9 @@
 package id.holigo.services.holigouserservice.services;
 
+import java.util.Objects;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +16,14 @@ import id.holigo.services.holigouserservice.repositories.UserRepository;
 import id.holigo.services.holigouserservice.web.exceptions.NotFoundException;
 import io.netty.util.internal.ThreadLocalRandom;
 
+@Slf4j
 @Service
 public class UserReferralServiceImpl implements UserReferralService {
 
     private UserReferralRepository userReferralRepository;
 
     private UserRepository userRepository;
+
     @Autowired
     public void setUserReferralRepository(UserReferralRepository userReferralRepository) {
         this.userReferralRepository = userReferralRepository;
@@ -51,6 +55,27 @@ public class UserReferralServiceImpl implements UserReferralService {
             }
         }
         return fetchUserReferral.get();
+    }
+
+    @Override
+    public Boolean updateUserFollower(Long userId) {
+        boolean updated = false;
+        Optional<UserReferral> fetchUserReferral = userReferralRepository.findByUserId(userId);
+        if (fetchUserReferral.isPresent()) {
+            UserReferral userReferral = fetchUserReferral.get();
+            Integer amount = userRepository.getFollower(userId);
+            if (!Objects.equals(amount, userReferral.getFollowers())) {
+                userReferral.setFollowers(amount);
+                try {
+                    userReferralRepository.save(userReferral);
+                } catch (Exception e) {
+                    return false;
+                }
+
+                updated = true;
+            }
+        }
+        return updated;
     }
 
     private String generateRandomReferral(User user) {

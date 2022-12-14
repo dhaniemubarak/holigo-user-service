@@ -7,8 +7,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 import id.holigo.services.holigouserservice.config.FileStorageProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableFeignClients
+@EnableScheduling
 @SpringBootApplication
 @EnableConfigurationProperties({ FileStorageProperties.class, ImageKitProperties.class})
 public class HoligoUserServiceApplication {
