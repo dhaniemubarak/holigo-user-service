@@ -8,9 +8,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserDeviceDto {
+
     private Long id;
 
-    private Long version;
+    private String mobileToken;
+
+    private Long userId;
 
     private DeviceTypeEnum deviceType;
 

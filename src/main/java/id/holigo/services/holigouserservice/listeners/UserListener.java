@@ -5,7 +5,10 @@ import java.util.Optional;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import id.holigo.services.common.model.UserDeviceDto;
+import id.holigo.services.holigouserservice.domain.UserDevice;
+import id.holigo.services.holigouserservice.repositories.UserDeviceRepository;
+import id.holigo.services.holigouserservice.web.mappers.UserDeviceMapper;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -33,6 +36,10 @@ public class UserListener {
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
+
+    private final UserDeviceMapper userDeviceMapper;
+
+    private final UserDeviceRepository userDeviceRepository;
 
     @Transactional
     @JmsListener(destination = JmsConfig.GET_USER_DATA_BY_PHONE_NUMBER_QUEUE)
@@ -63,6 +70,16 @@ public class UserListener {
         UpdateUserGroupDto updateUserGroupDto = userGroupEvent.getUpdateUserGroupDto();
         User user = userRepository.getById(updateUserGroupDto.getUserId());
         user.setUserGroup(updateUserGroupDto.getUserGroup());
+        userRepository.save(user);
+    }
+
+    @JmsListener(destination = JmsConfig.CREATE_USER_DEVICE)
+    public void listenForCreateDeviceUser(@Payload UserDeviceDto userDeviceDto) {
+        UserDevice userDevice = userDeviceMapper.userDeviceDtoToUserDevice(userDeviceDto);
+        User user = userRepository.getById(userDeviceDto.getUserId());
+        userDevice.setUser(user);
+        userDeviceRepository.save(userDevice);
+        user.setMobileToken(userDeviceDto.getMobileToken());
         userRepository.save(user);
     }
 }
