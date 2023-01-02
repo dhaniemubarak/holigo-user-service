@@ -3,7 +3,9 @@ package id.holigo.services.holigouserservice.services;
 import java.util.Objects;
 import java.util.Optional;
 
+import id.holigo.services.holigouserservice.services.influencer.InfluencerService;
 import id.holigo.services.holigouserservice.web.model.ImageKitDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +24,7 @@ import id.holigo.services.holigouserservice.web.model.UserPersonalDto;
 import id.holigo.services.holigouserservice.web.model.UserPersonalPhotoProfileDto;
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserPersonalServiceImpl implements UserPersonalService {
@@ -37,6 +40,8 @@ public class UserPersonalServiceImpl implements UserPersonalService {
     private final FileStorageService fileStorageService;
 
     private final UserPersonalPhotoProfileRepository userPersonalPhotoProfileRepository;
+
+    private final InfluencerService influencerService;
 
     @Override
     public UserPersonalDto getUserPersonalByUserId(Long userId) {
@@ -116,7 +121,7 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         }
         UserPersonalPhotoProfile tempPhotoProfile = null;
         UserPersonal userPersonal = fetchUserPersonal.get();
-        if (userPersonal.getPhotoProfile()!=null){
+        if (userPersonal.getPhotoProfile() != null) {
             tempPhotoProfile = userPersonal.getPhotoProfile();
 
         }
@@ -138,12 +143,20 @@ public class UserPersonalServiceImpl implements UserPersonalService {
         userPersonalRepository.save(userPersonal);
 
         //delete previous image
-        if (savedUserPersonalPhotoProfile.getId()!=null && tempPhotoProfile!=null){
+        if (savedUserPersonalPhotoProfile.getId() != null && tempPhotoProfile != null) {
             fileStorageService.deleteFile(tempPhotoProfile.getFileId());
             userPersonalPhotoProfileRepository.delete(tempPhotoProfile);
         }
-        return userPersonalPhotoProfileMapper
+        UserPersonalPhotoProfileDto userPersonalPhotoProfileDto = userPersonalPhotoProfileMapper
                 .userPersonalPhotoProfileToUserPersonalPhotoProfileDto(savedUserPersonalPhotoProfile);
+        if (userPersonal.getUser().getIsOfficialAccount()) {
+            try {
+                influencerService.updateProfilePicture(userPersonal.getUser().getId(), userPersonalPhotoProfileDto);
+            } catch (Exception e) {
+                log.error("Error : " + e.getMessage());
+            }
+        }
+        return userPersonalPhotoProfileDto;
     }
 
 //    @Override

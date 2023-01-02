@@ -20,6 +20,8 @@ public class UserPersonalPhotoProfileDto {
 
     private String fileDownloadUri;
 
+    private String fileId;
+
     private String fileType;
 
     private Long size;
