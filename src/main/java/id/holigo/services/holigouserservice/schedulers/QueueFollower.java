@@ -26,7 +26,7 @@ public class QueueFollower {
         this.queueUserReferralFollowerRepository = queueUserReferralFollowerRepository;
     }
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedRate = 60000)
     public void updateFollower() {
         List<QueueUserReferralFollower> userReferralFollowers = queueUserReferralFollowerRepository.findAllByHasUpdate(false);
         userReferralFollowers.forEach(queueUserReferralFollower -> {

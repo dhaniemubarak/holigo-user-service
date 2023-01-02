@@ -3,6 +3,8 @@ package id.holigo.services.holigouserservice.services;
 import java.util.Objects;
 import java.util.Optional;
 
+import id.holigo.services.holigouserservice.services.influencer.InfluencerService;
+import id.holigo.services.holigouserservice.services.influencer.InfluencerServiceFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,13 @@ public class UserReferralServiceImpl implements UserReferralService {
     private UserReferralRepository userReferralRepository;
 
     private UserRepository userRepository;
+
+    private InfluencerService influencerService;
+
+    @Autowired
+    public void setInfluencerService(InfluencerService influencerService) {
+        this.influencerService = influencerService;
+    }
 
     @Autowired
     public void setUserReferralRepository(UserReferralRepository userReferralRepository) {
@@ -71,7 +80,9 @@ public class UserReferralServiceImpl implements UserReferralService {
                 } catch (Exception e) {
                     return false;
                 }
-
+                if (userReferral.getUser().getIsOfficialAccount()) {
+                    influencerService.updateInfluencerFollower(userReferral.getUser().getPhoneNumber(), amount);
+                }
                 updated = true;
             }
         }
