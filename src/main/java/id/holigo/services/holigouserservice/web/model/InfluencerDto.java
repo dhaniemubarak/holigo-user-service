@@ -9,7 +9,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class InfluencerFollowerDto implements Serializable {
+public class InfluencerDto implements Serializable {
 
     private Integer holigoFollower;
+
+    private String referralCode;
 }

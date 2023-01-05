@@ -77,13 +77,18 @@ public class UserReferralServiceImpl implements UserReferralService {
                 userReferral.setFollowers(amount);
                 try {
                     userReferralRepository.save(userReferral);
+                    if (userReferral.getUser().getIsOfficialAccount()) {
+                        influencerService.updateInfluencerFollower(userReferral.getUser().getPhoneNumber(), amount);
+                    }
                 } catch (Exception e) {
                     return false;
                 }
+                updated = true;
+            } else {
                 if (userReferral.getUser().getIsOfficialAccount()) {
                     influencerService.updateInfluencerFollower(userReferral.getUser().getPhoneNumber(), amount);
                 }
-                updated = true;
+                return true;
             }
         }
         return updated;

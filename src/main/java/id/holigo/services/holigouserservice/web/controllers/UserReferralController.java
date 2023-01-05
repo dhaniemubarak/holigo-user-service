@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import id.holigo.services.holigouserservice.domain.QueueUserReferralPoint;
 import id.holigo.services.holigouserservice.repositories.QueueUserReferralPointRepository;
+import id.holigo.services.holigouserservice.services.influencer.InfluencerService;
 import id.holigo.services.holigouserservice.web.exceptions.ForbiddenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ import id.holigo.services.holigouserservice.web.model.UserReferralDto;
 @RestController
 public class UserReferralController {
 
+    private InfluencerService influencerService;
+
     private UserReferralRepository userReferralRepository;
 
     private UserReferralMapper userReferralMapper;
@@ -58,6 +61,11 @@ public class UserReferralController {
     @Autowired
     public void setUserReferralService(UserReferralService userReferralService) {
         this.userReferralService = userReferralService;
+    }
+
+    @Autowired
+    public void setInfluencerService(InfluencerService influencerService) {
+        this.influencerService = influencerService;
     }
 
     @GetMapping("/api/v1/userReferral")
@@ -135,11 +143,18 @@ public class UserReferralController {
                 throw new ForbiddenException();
             }
             if (userReferral.getUser().getId().equals(userId)) {
-                userReferral.setReferral(userReferralDto.getReferral().toUpperCase());
-                userReferral.setChangeGranted(userReferral.getChangeGranted() - 1);
-                UserReferral updatedUserReferral = userReferralRepository.save(userReferral);
-                return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(updatedUserReferral),
-                        HttpStatus.OK);
+                try {
+                    userReferral.setReferral(userReferralDto.getReferral().toUpperCase());
+                    userReferral.setChangeGranted(userReferral.getChangeGranted() - 1);
+                    UserReferral updatedUserReferral = userReferralRepository.save(userReferral);
+                    influencerService.updateReferralCode(userReferral.getUser().getPhoneNumber(), userReferral.getReferral());
+                    return new ResponseEntity<>(userReferralMapper.userReferralToUserReferralDto(updatedUserReferral),
+                            HttpStatus.OK);
+                } catch (Exception e) {
+                    log.error("Error : {}", e.getMessage());
+                    return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
             } else {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }

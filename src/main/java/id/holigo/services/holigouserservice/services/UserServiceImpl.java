@@ -101,7 +101,8 @@ public class UserServiceImpl implements UserService {
                 boolean updatedUserReferral = userReferralService.updateUserFollower(userSaved.getParent().getId());
                 if (!updatedUserReferral) {
                     queueUserReferralFollowerRepository.save(QueueUserReferralFollower.builder()
-                            .userId(userSaved.getParent().getId()).hasUpdate(false).build());
+                            .userId(userSaved.getParent().getId()).hasUpdate(false).createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                            .updatedAt(Timestamp.valueOf(LocalDateTime.now())).build());
                 }
 //                UserReferral userReferral = userReferralRepository.findByReferral(userDto.getReferral()).orElseThrow();
 //                userReferral.setFollowers(userReferral.getFollowers() + 1);
@@ -128,7 +129,8 @@ public class UserServiceImpl implements UserService {
                 boolean updatedUserReferral = userReferralService.updateUserFollower(userDto.getParent().getId());
                 if (!updatedUserReferral) {
                     queueUserReferralFollowerRepository.save(QueueUserReferralFollower.builder()
-                            .userId(userDto.getParent().getId()).hasUpdate(false).build());
+                            .userId(userDto.getParent().getId()).hasUpdate(false).createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                            .updatedAt(Timestamp.valueOf(LocalDateTime.now())).build());
                 }
             }
         }
